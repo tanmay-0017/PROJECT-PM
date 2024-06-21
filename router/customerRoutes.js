@@ -8,7 +8,7 @@ import {
     getCustomers,
     updateCustomer,
     
-} from '../controllers/customerController.js';
+} from '../Controllers/customerController.js';
 
 const router = express.Router();
 
