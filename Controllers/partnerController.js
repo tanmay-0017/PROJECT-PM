@@ -21,11 +21,11 @@ export const getPartners = async (req, res) => {
 
 export const getPartnerById = async (req, res) => {
   try {
-    const Partner = await Partner.findById(req.params.id);
-    if (!Partner) {
+    const Partners = await Partner.findById(req.params.id);
+    if (!Partners) {
       return res.status(404).json({ message: 'Partner not found' });
     }
-    res.status(200).json(Partner);
+    res.status(200).json(Partners);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
