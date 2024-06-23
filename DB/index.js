@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
-//new
+//new 
+
 export const ConnectDB = async () => {
   try {
     const ConnectionInstance = await mongoose.connect(
