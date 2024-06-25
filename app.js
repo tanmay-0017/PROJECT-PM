@@ -6,6 +6,7 @@ import cors from "cors";
 import logger from "./Middlewares/logger.js";
 import errorMiddleware from "./Middlewares/errorMiddleware.js";
 import authRoutes from "./router/authRoutes.js";
+import bodyParser from "body-parser";
 const app = express();
 app.use(
   cors({
@@ -13,7 +14,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
