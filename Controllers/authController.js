@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import User from "../models/User.js";
+import User from "../Models/User.js";
 import { sendMail } from "../utils/email.js";
 import { generateOTP } from "../utils/otp.js";
 
