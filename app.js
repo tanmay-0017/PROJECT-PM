@@ -24,6 +24,6 @@ app.use(errorMiddleware);
 
 app.use("/api/partners", partnerRouter);
 app.use("/api/customers", customerRoutes);
-app.use("/api", authRoutes);
+app.use("/api/login", authRoutes);
 
 export { app };
