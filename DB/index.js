@@ -6,7 +6,7 @@ dotenv.config();
 export const ConnectDB = async () => {
   try {
     const ConnectionInstance = await mongoose.connect(
-      `${process.env.MONGODB_API}/${process.env.BD_NAME}`
+      `${process.env.MONGODB_API}/${process.env.DB_NAME}`
     );
     console.log(
       `\n MongoDB Connection Instance || !BD HOST ${ConnectionInstance.connection.host}`
