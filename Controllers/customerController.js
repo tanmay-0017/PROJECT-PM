@@ -9,7 +9,11 @@ export const createCustomer = asyncHandler(async (req, res) => {
     if (emailFound){
         return res.status(400).json({ message: 'This customer already exits.' });
     }
-    const customerId = uuidv4();
+    // const customerId = uuidv4();
+
+    const customers = await Customer.find({});
+    const customerId = `ROFC${(customers.length + 1).toString()}`;
+
     Customer.create({
         name, 
         email, 

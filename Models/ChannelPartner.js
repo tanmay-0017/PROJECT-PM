@@ -8,6 +8,9 @@ const partnerSchema = new mongoose.Schema({
   projectName:String,
   projectLocation : String,
 
+},
+{
+  timestamps: true
 });
 
 const Partner = mongoose.model('Partner', partnerSchema);
