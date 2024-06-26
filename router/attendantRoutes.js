@@ -6,7 +6,7 @@ import {
     getAttendants,
     updateAttendant,
     
-} from '../Controllers/customerController.js';
+} from '../Controllers/attendantController.js';
 
 const router = express.Router();
 
