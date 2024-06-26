@@ -34,7 +34,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
         projectName, 
         projectLocation, 
         customerId,
-        attendant: availableAttendant.name
+        attendant: availableAttendant._id
     })
     res.status(201).json({
         name, 
@@ -49,13 +49,13 @@ export const createCustomer = asyncHandler(async (req, res) => {
 
 
 export const getCustomers = asyncHandler(async (req, res) => {
-    const customers = await Customer.find();
+    const customers = await Customer.find().populate('attendant', 'name');
     res.status(200).json(customers);
 });
 
 
 export const getCustomerById = asyncHandler(async (req, res) => {
-    const registeredCustomer = await Customer.find({"customerId" : req.params.id});
+    const registeredCustomer = await Customer.find({"customerId" : req.params.id}).populate('attendant', 'name');
     if (!registeredCustomer) return res.status(404).json({ message: 'Customer not found' });
     res.status(200).json(registeredCustomer);
 });
@@ -65,6 +65,9 @@ export const updateCustomer = asyncHandler(async (req, res) => {
     const { name, email, mobile } = req.body;
     const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email, mobile }, { new: true, runValidators: true });
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    
+    await Attendant.findByIdAndUpdate(customer.attendant, { status: 'available' });
+    
     res.status(200).json(customer);
 });
 
