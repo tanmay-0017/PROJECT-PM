@@ -9,10 +9,16 @@ const attendantSchema = new mongoose.Schema({
         type: String,
         enum: ['available', 'assigned'],
         default: 'available'
+    },
+    team: {
+        type: String,
+        required: true
     }
 },
 {
     timestamps: true
 });
 
-export const Attendant = mongoose.Schema('Attendant', attendantSchema);
+const Attendant = mongoose.model('Attendant', attendantSchema);
+
+export default Attendant;
