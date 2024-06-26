@@ -7,7 +7,8 @@ const customerSchema = new mongoose.Schema({
     projectName: {type: String, required: true},
     projectLocation: {type: String, required: true},
     customerId: {type: String, required: true, unique: true},
-    attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant' }
+    attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant' },
+    attendantName: { type: String, required: true }
 },
 {
     timestamps: true
