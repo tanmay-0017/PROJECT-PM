@@ -42,7 +42,8 @@ export const createCustomer = asyncHandler(async (req, res) => {
         mobile, 
         projectName, 
         projectLocation, 
-        customerId
+        customerId,
+        attendant: availableAttendant.name
     })
 });
 
