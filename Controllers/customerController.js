@@ -35,7 +35,8 @@ export const createCustomer = asyncHandler(async (req, res) => {
         projectLocation, 
         customerId,
         attendant: availableAttendant._id,
-        attendantName: availableAttendant.name
+        attendantName: availableAttendant.name,
+        team: availableAttendant.team
     })
     res.status(201).json({
         name, 
@@ -44,7 +45,8 @@ export const createCustomer = asyncHandler(async (req, res) => {
         projectName, 
         projectLocation, 
         customerId,
-        attendantName: availableAttendant.name
+        attendantName: availableAttendant.name,
+        team: availableAttendant.team
     })
 });
 

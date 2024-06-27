@@ -8,7 +8,8 @@ const customerSchema = new mongoose.Schema({
     projectLocation: {type: String, required: true},
     customerId: {type: String, required: true, unique: true},
     attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant' },
-    attendantName: { type: String, required: true }
+    attendantName: { type: String, required: true },
+    team: {type: String, required: true}
 },
 {
     timestamps: true
