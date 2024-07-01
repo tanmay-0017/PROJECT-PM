@@ -1,6 +1,7 @@
 import Customer from '../Models/customer.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import Attendant from '../Models/Attendant.js';
+import Project from '../Models/projectModel.js';
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -15,16 +16,22 @@ export const createCustomer = asyncHandler(async (req, res) => {
     const customers = await Customer.find({});
     const customerId = `ROFC${(customers.length + 1).toString()}`;
 
+    const project = await Project.findOne({"name" : projectName});
+    if (!project) {
+        return res.status(400).json({ message: 'Project not found.' });
+    }
+    const teams = project.teams;
+
     const availableAttendant = await Attendant.findOneAndUpdate(
-        {status: 'available'},
-        {
-            status: 'assigned'
+        { status: 'available', team: { $in: teams } },
+        { 
+            status: 'assigned' 
         },
-        {new: true}
+        { new: true }
     );
 
     if (!availableAttendant) {
-        return res.status(400).json({ message: 'No available attendants.' });
+        return res.status(400).json({ message: 'No available attendants of same team.' });
     }
 
     Customer.create({
