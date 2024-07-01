@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get('/projects', getProjects);
-router.get('/projects/:name/location', getProjectLocation);
-router.post('/projects', createProject);
-router.put('/projects/:name', updateProject);
-router.delete('/projects/:name', deleteProject);
+router.get('/', getProjects);
+router.get('/location/:name', getProjectLocation);
+router.post('/', createProject);
+router.put('/update/:name', updateProject);
+router.delete('/delete/:name', deleteProject);
 
 export default router;
