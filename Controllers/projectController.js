@@ -15,7 +15,7 @@ export const getProjectLocation = async (req, res) => {
     try {
         const project = await Project.findOne({ name: req.params.name });
         if (project) {
-            res.status(200).json({ location: project.location });
+            res.status(200).json({ location: project.location, teams: project.teams });
         } else {
             res.status(404).json({ message: 'Project not found' });
         }
@@ -26,11 +26,12 @@ export const getProjectLocation = async (req, res) => {
 
 // Create a new project
 export const createProject = async (req, res) => {
-    const { name, location } = req.body;
+    const { name, location, teams } = req.body;
 
     const newProject = new Project({
         name,
-        location
+        location,
+        teams
     });
 
     try {
@@ -44,13 +45,13 @@ export const createProject = async (req, res) => {
 // Update an existing project
 export const updateProject = async (req, res) => {
     const { name } = req.params;
-    const { location } = req.body;
+    const { location, teams } = req.body;
 
     try {
         const updatedProject = await Project.findOneAndUpdate(
             { name },
-            { location },
-           
+            { location, teams },
+            { new: true }
         );
 
         if (!updatedProject) {

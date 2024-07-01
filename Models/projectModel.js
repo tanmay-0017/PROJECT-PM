@@ -8,7 +8,11 @@ const projectSchema = new mongoose.Schema({
     location: {
         type: String,
         required: true
-    }
+    },
+    teams: [{
+        type: String, // Array of team names
+        default : []
+    }]
 });
 
 const Project = mongoose.model('Project', projectSchema);
