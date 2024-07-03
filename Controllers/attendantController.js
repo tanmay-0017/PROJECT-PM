@@ -45,6 +45,21 @@ export const makeAttendantAvailable = asyncHandler(async (req, res) => {
 })
 
 
+export const makeAllAttendantsAvailable = asyncHandler(async (req, res) => {
+    const result = await Attendant.updateMany(
+        { status: 'assigned' },
+        { $set: { status: 'available' } },
+        { runValidators: true }
+    );
+    
+    if (result.nModified === 0) {
+        return res.status(404).json({ message: 'No attendants were updated' });
+    }
+    
+    res.status(200).json({ message: 'All attendants are now available', modifiedCount: result.nModified });
+});
+
+
 
 export const updateAttendant = asyncHandler(async (req, res) => {
     const { name, status, team } = req.body;
