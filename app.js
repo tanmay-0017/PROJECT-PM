@@ -8,6 +8,8 @@ import errorMiddleware from "./Middlewares/errorMiddleware.js";
 import authRoutes from "./router/authRoutes.js";
 import attendantRoutes from "./router/attendantRoutes.js";
 import projectRoutes from "./router/projectRoutes.js";
+import serviceRequest from "./router/serviceRequestRoutes.js";
+import serviceRoutes from "./router/serviceRoutes.js";
 import bodyParser from "body-parser";
 const app = express();
 app.use(
@@ -29,5 +31,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/attendants", attendantRoutes);
 app.use("/api/login", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/seviceRequest", serviceRequest);
+app.use("/api/services", serviceRoutes);
 
 export { app };
