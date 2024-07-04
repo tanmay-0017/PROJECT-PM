@@ -14,10 +14,10 @@ export const requestService = async (req, res) => {
         }
 
         const customerCredentials = await Customer.findOne({
-            customerId: customerId,
-            name: name,
-            mobile: mobileNo,
-            projectName: projectName
+            customerId,
+            name,
+            mobileNo,
+            projectName
         });
 
         if (!customerCredentials) {
@@ -40,7 +40,7 @@ export const requestService = async (req, res) => {
             return res.status(404).json({ message: 'No available service person found' });
         }
 
-        const serviceRequest = await ServiceRequest.create({
+        ServiceRequest.create({
             name,
             mobileNo,
             customerId,

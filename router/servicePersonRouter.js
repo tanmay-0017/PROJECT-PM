@@ -16,6 +16,6 @@ router
   .put(updateServiceById)
   .delete(deleteService);
 
-router.route('/servicePersonAvailable').put(makeservicePersonAvailable);
+router.route('/servicePersonAvailable/:id').put(makeservicePersonAvailable);
 
 export default router;
