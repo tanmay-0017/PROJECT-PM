@@ -7,7 +7,9 @@ const partnerSchema = new mongoose.Schema({
   customerMobileLastFour: String,
   projectName:String,
   projectLocation : String,
-
+  partnerId: String,
+  attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant' },
+  attendantName: { type: String, required: true }
 },
 {
   timestamps: true

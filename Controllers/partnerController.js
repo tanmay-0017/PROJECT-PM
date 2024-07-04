@@ -1,9 +1,43 @@
 import Partner from "../Models/ChannelPartner.js";
+import Attendant from "../Models/Attendant.js";
+import Project from "../Models/projectModel.js";
 
 export const createPartner = async (req, res) => {
   try {
-    const newPartner = new Partner(req.body);
-    await newPartner.save();
+    const { channelPartnerName, channelPartnerCompanyName, customerName, customerMobileLastFour, projectName, projectLocation } = req.body;
+
+    const project = await Project.findOne({ name: projectName, location: projectLocation });
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    const { teams } = project;
+
+    const availableAttendant = await Attendant.findOneAndUpdate(
+      { status: 'available', team: { $in: teams } },
+      { status: 'assigned' },
+      { new: true }
+    );
+
+    if (!availableAttendant) {
+      return res.status(400).json({ message: 'No available attendants of the same team.' });
+    }
+
+    const partners = await Partner.find({});
+    const partnerId = `CHROF${(partners.length + 1).toString()}`;
+
+    const newPartner = await Partner.create({
+      channelPartnerName,
+      channelPartnerCompanyName,
+      customerName,
+      customerMobileLastFour,
+      projectName,
+      projectLocation,
+      partnerId,
+      attendant: availableAttendant._id,
+      attendantName: availableAttendant.name
+    });
+
     res.status(201).json(newPartner);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -12,8 +46,8 @@ export const createPartner = async (req, res) => {
 
 export const getPartners = async (req, res) => {
   try {
-    const Partners = await Partner.find();
-    res.status(200).json(Partners);
+    const partners = await Partner.find();
+    res.status(200).json(partners);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -21,11 +55,11 @@ export const getPartners = async (req, res) => {
 
 export const getPartnerById = async (req, res) => {
   try {
-    const Partners = await Partner.findById(req.params.id);
-    if (!Partners) {
+    const partner = await Partner.findById(req.params.id);
+    if (!partner) {
       return res.status(404).json({ message: 'Partner not found' });
     }
-    res.status(200).json(Partners);
+    res.status(200).json(partner);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
