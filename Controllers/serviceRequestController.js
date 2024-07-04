@@ -7,21 +7,18 @@ export const requestService = async (req, res) => {
     const { name, mobileNo, customerId, type, projectName } = req.body;
 
     try {
+        if (!name || !mobileNo || !customerId || !type || !projectName) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         const customer = await Customer.findOne({ customerId: customerId });
 
         if (!customer) {
             return res.status(404).json({ message: 'Customer not found' });
         }
 
-        const customerCredentials = await Customer.findOne({
-            customerId,
-            name,
-            mobileNo,
-            projectName
-        });
-
-        if (!customerCredentials) {
-            return res.status(404).json({ message: 'Incorrect Customer Credentials' });
+        if (customer.name !== name || customer.mobile !== mobileNo || customer.projectName !== projectName) {
+            return res.status(401).json({ message: 'Incorrect Customer Credentials' });
         }
 
         const serviceFound = await Service.findOne({ serviceType: type });
@@ -44,7 +41,7 @@ export const requestService = async (req, res) => {
             name,
             mobileNo,
             customerId,
-            type,
+            typeOfService: type,
             projectName,
             servicePerson: availableServicePerson._id,
             servicePersonName: availableServicePerson.name
@@ -54,13 +51,13 @@ export const requestService = async (req, res) => {
             name,
             mobileNo,
             customerId,
-            type,
+            typeOfService: type,
             projectName,
             servicePerson: availableServicePerson,
             servicePersonName: availableServicePerson.name
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error processing service request:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
