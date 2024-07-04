@@ -4,6 +4,6 @@ import {
 } from '../Controllers/serviceRequestController.js';
 const router = express.Router();
 
-router.route('/').get(requestService);
+router.route('/').post(requestService);
 
 export default router;

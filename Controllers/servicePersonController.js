@@ -33,6 +33,19 @@ export const getServicePersonById = asyncHandler(async (req, res) => {
 });
 
 
+export const makeservicePersonAvailable = asyncHandler(async (req, res) => {
+  const attendant = await ServicePerson.findByIdAndUpdate(
+      req.params.id, 
+      { 
+          $set: {status: 'available'}
+      }, 
+      { new: true, runValidators: true }
+  );
+  if (!attendant) return res.status(404).json({ message: 'Service Person not found' });
+  res.status(200).json(attendant);
+})
+
+
 export const updateServiceById = asyncHandler(async (req, res) => {
   const { type, name } = req.body;
 

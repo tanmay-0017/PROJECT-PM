@@ -3,16 +3,19 @@ const router = express.Router();
 import {
   getServices,
   createServicePerson,
-  getServiceById,
+  getServicePersonById,
   updateServiceById,
   deleteService,
+  makeservicePersonAvailable
 } from '../Controllers/servicePersonController.js';
 
 router.route('/').get(getServices).post(createServicePerson);
 router
   .route('/:id')
-  .get(getServiceById)
+  .get(getServicePersonById)
   .put(updateServiceById)
   .delete(deleteService);
+
+router.route('/servicePersonAvailable').put(makeservicePersonAvailable);
 
 export default router;

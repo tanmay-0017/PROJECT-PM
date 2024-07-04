@@ -16,7 +16,7 @@ export const requestService = async (req, res) => {
         const customerCredentials = await Customer.findOne({
             customerId: customerId,
             name: name,
-            mobileNo: mobileNo,
+            mobile: mobileNo,
             projectName: projectName
         });
 

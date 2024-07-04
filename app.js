@@ -10,6 +10,7 @@ import attendantRoutes from "./router/attendantRoutes.js";
 import projectRoutes from "./router/projectRoutes.js";
 import serviceRequest from "./router/serviceRequestRoutes.js";
 import serviceRoutes from "./router/serviceRoutes.js";
+import servicePersonRouter from "./router/servicePersonRouter.js";
 import bodyParser from "body-parser";
 const app = express();
 app.use(
@@ -33,5 +34,6 @@ app.use("/api/login", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/seviceRequest", serviceRequest);
 app.use("/api/services", serviceRoutes);
+app.use("/api/servicePerson", servicePersonRouter);
 
 export { app };
