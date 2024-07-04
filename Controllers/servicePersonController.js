@@ -46,6 +46,23 @@ export const makeservicePersonAvailable = asyncHandler(async (req, res) => {
 })
 
 
+
+export const makeAllServicePersonAvailable = asyncHandler(async (req, res) => {
+  const result = await ServicePerson.updateMany(
+      { status: 'assigned' },
+      { $set: { status: 'available' } },
+      { runValidators: true }
+  );
+  
+  if (result.nModified === 0) {
+      return res.status(404).json({ message: 'No service person were updated' });
+  }
+  
+  res.status(200).json({ message: 'All Service Person are now available', modifiedCount: result.nModified });
+});
+
+
+
 export const updateServiceById = asyncHandler(async (req, res) => {
   const { type, name } = req.body;
 

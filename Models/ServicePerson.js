@@ -12,7 +12,7 @@ const servicePersonSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['available', 'assigned'],
-    default: 'available',
+    default: 'available'
   }
 });
 

@@ -6,9 +6,11 @@ import {
   getServicePersonById,
   updateServiceById,
   deleteService,
-  makeservicePersonAvailable
+  makeservicePersonAvailable,
+  makeAllServicePersonAvailable
 } from '../Controllers/servicePersonController.js';
 
+router.route('/makeAllServicePersonAvailable').put(makeAllServicePersonAvailable);
 router.route('/').get(getServices).post(createServicePerson);
 router
   .route('/:id')

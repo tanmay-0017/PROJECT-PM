@@ -40,7 +40,7 @@ export const requestService = async (req, res) => {
             return res.status(404).json({ message: 'No available service person found' });
         }
 
-        ServiceRequest.create({
+        await ServiceRequest.create({
             name,
             mobileNo,
             customerId,
