@@ -23,8 +23,18 @@ export const createPartner = async (req, res) => {
       return res.status(400).json({ message: 'No available attendants of the same team.' });
     }
 
-    const partners = await Partner.find({});
-    const partnerId = `CHROF${(partners.length + 1).toString()}`;
+    // const partners = await Partner.find({});
+    // const partnerId = `CHROF${(partners.length + 1).toString()}`;
+
+    const lastPartner = await Partner.findOne().sort({ $natural: -1 });
+    let partnerId;
+    if (lastPartner) {
+        const lastPartnerIdNum = parseInt(lastPartner.partnerId.substring(5));
+        partnerId = `CHROF${(lastPartnerIdNum + 1).toString()}`;
+    }
+    else {
+      partnerId = 'CHROF1';
+    }
 
     const newPartner = await Partner.create({
       channelPartnerName,
