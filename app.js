@@ -12,6 +12,7 @@ import serviceRequest from "./router/serviceRequestRoutes.js";
 import serviceRoutes from "./router/serviceRoutes.js";
 import servicePersonRouter from "./router/servicePersonRouter.js";
 import bodyParser from "body-parser";
+import timeline from "./router/timesheet.routes.js";
 const app = express();
 app.use(
   cors({
@@ -35,5 +36,6 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/seviceRequest", serviceRequest);
 app.use("/api/services", serviceRoutes);
 app.use("/api/servicePerson", servicePersonRouter);
+app.use("/api/timeSheet", timeline);
 
 export { app };
