@@ -14,7 +14,36 @@ export const createCustomer = asyncHandler(async (req, res) => {
     // const customerId = uuidv4();
 
     const customers = await Customer.find({});
-    const customerId = `ROFC${(customers.length + 1).toString()}`;
+    // const customerId = `ROFC${(customers.length + 1).toString()}`;
+
+    // var i = 1;
+    // while (Customer.findOne({customerId: customerId})){
+    //     customerId = `ROFC${(customers.length + i).toString()}`;
+    //     i++;
+    // }
+
+    const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
+    let customerId;
+    if (lastCustomer) {
+        const lastCustomerIdNum = parseInt(lastCustomer.customerId.substring(4));
+        customerId = `ROFC${(lastCustomerIdNum + 1).toString()}`;
+    } 
+    else {
+        customerId = 'ROFC1';
+    }
+
+    // const lastCustomer = await Customer.findOne().sort({ customerId: -1 });
+    // console.log(lastCustomer);
+    // let newCustomerId;
+    // if (lastCustomer) {
+    //     const lastIdNum = parseInt(lastCustomer.customerId.substr(4));
+    //     newCustomerId = `ROFC${(lastIdNum + 1).toString()}`;
+    // } else {
+    //     newCustomerId = 'ROFC1';
+    // }
+
+
+    
 
     const project = await Project.findOne({"name" : projectName});
     if (!project) {
