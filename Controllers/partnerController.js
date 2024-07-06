@@ -56,7 +56,7 @@ export const createPartner = async (req, res) => {
 
 export const getPartners = async (req, res) => {
   try {
-    const partners = await Partner.find();
+    const partners = await Partner.find().sort({createdAt : -1});
     res.status(200).json(partners);
   } catch (error) {
     res.status(500).json({ message: error.message });

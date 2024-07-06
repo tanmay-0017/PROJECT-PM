@@ -3,7 +3,7 @@ import  Service  from '../Models/Service.js';
 // Get all services
 export const getServices = async (req, res) => {
     try {
-        const services = await Service.find();
+        const services = await Service.find().sort({createdAt : -1});
         res.status(200).json(services);
     } catch (error) {
         res.status(500).json({ message: error.message });
