@@ -7,8 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const createCustomer = asyncHandler(async (req, res) => {
     const { name, email, mobile, projectName, projectLocation  } = req.body;
-    const emailFound = await Customer.findOne({email});
-    if (emailFound){
+    const mobileFound = await Customer.findOne({mobile});
+    if (mobileFound){
         return res.status(400).json({ message: 'This customer already exits.' });
     }
     // const customerId = uuidv4();

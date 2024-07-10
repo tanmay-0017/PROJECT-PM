@@ -1,9 +1,10 @@
 import express from 'express';
 import {
-    requestService
+    requestService,
+    getrequestService
 } from '../Controllers/serviceRequestController.js';
 const router = express.Router();
 
-router.route('/').post(requestService);
+router.route('/').post(requestService).get(getrequestService);
 
 export default router;

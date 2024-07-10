@@ -61,3 +61,24 @@ export const requestService = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+
+export const getrequestService = async(req, res) => {
+    const {mobileNo} = req.body;
+
+    if (!mobileNo){
+        return res.status(400).json({ message: 'Mobile Number is required' });
+    }
+
+    const customer = await Customer.findOne({mobile: mobileNo});
+
+    if (!customer){
+        return res.status(401).json({ message: 'This customer number does not exist'});
+    }
+
+    res.status(200).json({
+        name: customer.name,
+        customerId: customer.customerId,
+        projectName: customer.projectName,
+    });
+}
