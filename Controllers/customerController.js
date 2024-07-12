@@ -231,7 +231,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
 
 
 export const getCustomers = asyncHandler(async (req, res) => {
-    const customers = await Customer.find().populate('attendant', 'name').sort({createdAt : -1});
+    const customers = await Customer.find().populate('attendant', 'name').sort({updatedAt : -1});
     res.status(200).json(customers);
 });
 
