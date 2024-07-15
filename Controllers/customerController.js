@@ -10,7 +10,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
     const mobileFound = await Customer.findOne({mobile});
     if (mobileFound){
         // return res.status(400).json({ message: 'This customer already exits.' });
-        if (mobileFound.name != name) return res.status(400).json({ message: 'Customer Name does not match' });
+        // if (mobileFound.name != name) return res.status(400).json({ message: 'Customer Name does not match' });
         const project = await Project.findOne({"name" : projectName});
         if (!project) {
             return res.status(400).json({ message: 'Project not found.' });
@@ -245,7 +245,7 @@ export const getCustomerById = asyncHandler(async (req, res) => {
 
 export const updateCustomer = asyncHandler(async (req, res) => {
     const { name, email, mobile } = req.body;
-    const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email, mobile }, { new: true, runValidators: true });
+    const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email }, { new: true, runValidators: true });
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     
     await Attendant.findByIdAndUpdate(customer.attendant, { status: 'available' });
