@@ -6,10 +6,71 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export const createCustomer = asyncHandler(async (req, res) => {
-    const { name, email, mobile, projectName, projectLocation  } = req.body;
+    const { name, email, mobile, projectName, projectLocation, notes  } = req.body;
     const mobileFound = await Customer.findOne({mobile});
     if (mobileFound){
-        return res.status(400).json({ message: 'This customer already exits.' });
+        // return res.status(400).json({ message: 'This customer already exits.' });
+        // if (mobileFound.name != name) return res.status(400).json({ message: 'Customer Name does not match' });
+        const project = await Project.findOne({"name" : projectName});
+        if (!project) {
+            return res.status(400).json({ message: 'Project not found.' });
+        }
+        const teams = project.teams;
+
+        const availableAttendant = await Attendant.findOneAndUpdate(
+            { status: 'available', team: { $in: teams } },
+            { 
+                status: 'assigned' 
+            },
+            { new: true }
+        );
+
+        if (!availableAttendant) {
+            return res.status(400).json({ message: 'No available attendants of same team.' });
+        }
+
+        // Customer.create({
+        //     name, 
+        //     email, 
+        //     mobile, 
+        //     projectName, 
+        //     projectLocation, 
+        //     customerId: mobileFound.customerId,
+        //     attendant: availableAttendant._id,
+        //     attendantName: availableAttendant.name,
+        //     team: availableAttendant.team
+        // })
+
+
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+            mobileFound._id,
+            {
+                $set: {
+                    name,
+                    email,
+                    mobile,
+                    projectName,
+                    projectLocation,
+                    customerId: mobileFound.customerId,
+                    attendant: availableAttendant._id,
+                    attendantName: availableAttendant.name,
+                    team: availableAttendant.team,
+                    notes
+                },
+                $push: {
+                    log: {
+                        projectName,
+                        projectLocation,
+                        attendant: availableAttendant._id,
+                        attendantName: availableAttendant.name,
+                        team: availableAttendant.team,
+                    },
+                },
+            },
+            { new: true }
+        );
+
+        return res.status(201).json(updatedCustomer);
     }
     // const customerId = uuidv4();
 
@@ -72,7 +133,15 @@ export const createCustomer = asyncHandler(async (req, res) => {
         customerId,
         attendant: availableAttendant._id,
         attendantName: availableAttendant.name,
-        team: availableAttendant.team
+        team: availableAttendant.team,
+        notes,
+        log: [{
+                projectName,
+                projectLocation,
+                attendant: availableAttendant._id,
+                attendantName: availableAttendant.name,
+                team: availableAttendant.team,
+        }]
     })
     res.status(201).json({
         name, 
@@ -82,13 +151,87 @@ export const createCustomer = asyncHandler(async (req, res) => {
         projectLocation, 
         customerId,
         attendantName: availableAttendant.name,
-        team: availableAttendant.team
+        team: availableAttendant.team,
+        notes,
+        log: [{
+            projectName,
+            projectLocation,
+            attendant: availableAttendant._id,
+            attendantName: availableAttendant.name,
+            team: availableAttendant.team,
+        }]
     })
 });
 
 
+// export const createCustomer = asyncHandler(async (req, res) => {
+//     const { name, email, mobile, projectName, projectLocation } = req.body;
+//     const mobileFound = await Customer.findOne({ mobile });
+
+//     let customerId;
+//     if (mobileFound) {
+//         if (mobileFound.name !== name) {
+//             return res.status(400).json({ message: 'Customer Name does not match' });
+//         }
+//         customerId = mobileFound.customerId;
+//     } else {
+//         const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
+//         if (lastCustomer) {
+//             const lastCustomerIdNum = parseInt(lastCustomer.customerId.substring(4));
+//             customerId = `ROFC${(lastCustomerIdNum + 1).toString()}`;
+//         } else {
+//             customerId = 'ROFC1';
+//         }
+//     }
+
+//     const project = await Project.findOne({ name: projectName });
+//     if (!project) {
+//         return res.status(400).json({ message: 'Project not found.' });
+//     }
+
+//     const teams = project.teams;
+
+//     const availableAttendant = await Attendant.findOneAndUpdate(
+//         { status: 'available', team: { $in: teams } },
+//         { status: 'assigned' },
+//         { new: true }
+//     );
+
+//     if (!availableAttendant) {
+//         return res.status(400).json({ message: 'No available attendants of same team.' });
+//     }
+
+//     const newCustomer = await Customer.create({
+//         name,
+//         email,
+//         mobile,
+//         projectName,
+//         projectLocation,
+//         customerId,
+//         attendant: availableAttendant._id,
+//         attendantName: availableAttendant.name,
+//         team: availableAttendant.team,
+//         log: mobileFound ? mobileFound.log.concat({
+//             projectName,
+//             projectLocation,
+//             attendant: availableAttendant._id,
+//             attendantName: availableAttendant.name,
+//             team: availableAttendant.team,
+//         }) : [{
+//             projectName,
+//             projectLocation,
+//             attendant: availableAttendant._id,
+//             attendantName: availableAttendant.name,
+//             team: availableAttendant.team,
+//         }]
+//     });
+
+//     res.status(201).json(newCustomer);
+// });
+
+
 export const getCustomers = asyncHandler(async (req, res) => {
-    const customers = await Customer.find().populate('attendant', 'name').sort({createdAt : -1});
+    const customers = await Customer.find().populate('attendant', 'name').sort({updatedAt : -1});
     res.status(200).json(customers);
 });
 
@@ -102,7 +245,7 @@ export const getCustomerById = asyncHandler(async (req, res) => {
 
 export const updateCustomer = asyncHandler(async (req, res) => {
     const { name, email, mobile } = req.body;
-    const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email, mobile }, { new: true, runValidators: true });
+    const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email }, { new: true, runValidators: true });
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     
     await Attendant.findByIdAndUpdate(customer.attendant, { status: 'available' });
