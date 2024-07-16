@@ -244,7 +244,7 @@ export const getCustomerById = asyncHandler(async (req, res) => {
 
 
 export const updateCustomer = asyncHandler(async (req, res) => {
-    const { name, email, mobile } = req.body;
+    const { name, email } = req.body;
     const customer = await Customer.findByIdAndUpdate(req.params.id, { name, email }, { new: true, runValidators: true });
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     
