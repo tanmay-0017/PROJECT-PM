@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import partnerRouter from "./router/partnerRouter.js";
 import customerRoutes from "./router/customerRoutes.js";
+import channelRouter from "./router/channelRouter.js"
 import cors from "cors";
 import logger from "./Middlewares/logger.js";
 import errorMiddleware from "./Middlewares/errorMiddleware.js";
@@ -37,5 +38,7 @@ app.use("/api/seviceRequest", serviceRequest);
 app.use("/api/services", serviceRoutes);
 app.use("/api/servicePerson", servicePersonRouter);
 app.use("/api/timeSheet", timeline);
+app.use('/api/channels', channelRouter);
+
 
 export { app };
