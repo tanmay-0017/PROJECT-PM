@@ -11,6 +11,7 @@ export const createPartner = async (req, res) => {
       customerMobileLastFour,
       projectName,
       projectLocation,
+      notes
     } = req.body;
 
     const project = await Project.findOne({
