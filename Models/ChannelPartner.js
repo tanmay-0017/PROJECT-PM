@@ -9,7 +9,9 @@ const partnerSchema = new mongoose.Schema({
   projectLocation : String,
   partnerId: String,
   attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant' },
-  attendantName: { type: String, required: true }
+  attendantName: { type: String, required: true },
+  timeDuration: {type: String, default: "00 : 00"},
+  notes: {type: String},
 },
 {
   timestamps: true
