@@ -45,7 +45,8 @@ export const createPartner = async (req, res) => {
       projectLocation,
       partnerId,
       attendant: availableAttendant._id,
-      attendantName: availableAttendant.name
+      attendantName: availableAttendant.name,
+      notes
     });
 
     res.status(201).json(newPartner);
