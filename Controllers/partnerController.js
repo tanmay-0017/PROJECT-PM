@@ -4,23 +4,35 @@ import Project from "../Models/projectModel.js";
 
 export const createPartner = async (req, res) => {
   try {
-    const { channelPartnerName, channelPartnerCompanyName, customerName, customerMobileLastFour, projectName, projectLocation } = req.body;
+    const {
+      channelPartnerName,
+      channelPartnerCompanyName,
+      customerName,
+      customerMobileLastFour,
+      projectName,
+      projectLocation,
+    } = req.body;
 
-    const project = await Project.findOne({ name: projectName, location: projectLocation });
+    const project = await Project.findOne({
+      name: projectName,
+      location: projectLocation,
+    });
     if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
+      return res.status(404).json({ message: "Project not found" });
     }
 
     const { teams } = project;
 
     const availableAttendant = await Attendant.findOneAndUpdate(
-      { status: 'available', team: { $in: teams } },
-      { status: 'assigned' },
+      { status: "available", team: { $in: teams } },
+      { status: "assigned" },
       { new: true }
     );
 
     if (!availableAttendant) {
-      return res.status(400).json({ message: 'No available attendants of the same team.' });
+      return res
+        .status(400)
+        .json({ message: "No available attendants of the same team." });
     }
 
     // const partners = await Partner.find({});
@@ -29,11 +41,10 @@ export const createPartner = async (req, res) => {
     const lastPartner = await Partner.findOne().sort({ $natural: -1 });
     let partnerId;
     if (lastPartner) {
-        const lastPartnerIdNum = parseInt(lastPartner.partnerId.substring(5));
-        partnerId = `CHROF${(lastPartnerIdNum + 1).toString()}`;
-    }
-    else {
-      partnerId = 'CHROF1';
+      const lastPartnerIdNum = parseInt(lastPartner.partnerId.substring(5));
+      partnerId = `CHROF${(lastPartnerIdNum + 1).toString()}`;
+    } else {
+      partnerId = "CHROF1";
     }
 
     const newPartner = await Partner.create({
@@ -46,7 +57,7 @@ export const createPartner = async (req, res) => {
       partnerId,
       attendant: availableAttendant._id,
       attendantName: availableAttendant.name,
-      notes
+      notes,
     });
 
     res.status(201).json(newPartner);
@@ -57,7 +68,7 @@ export const createPartner = async (req, res) => {
 
 export const getPartners = async (req, res) => {
   try {
-    const partners = await Partner.find().sort({createdAt : -1});
+    const partners = await Partner.find().sort({ createdAt: -1 });
     res.status(200).json(partners);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -66,9 +77,9 @@ export const getPartners = async (req, res) => {
 
 export const getPartnerById = async (req, res) => {
   try {
-    const partner = await Partner.findById(req.params.id);
+    const partner = await Partner.findOne({ partnerId: req.params.id });
     if (!partner) {
-      return res.status(404).json({ message: 'Partner not found' });
+      return res.status(404).json({ message: "Partner not found" });
     }
     res.status(200).json(partner);
   } catch (error) {
@@ -78,9 +89,13 @@ export const getPartnerById = async (req, res) => {
 
 export const updatePartner = async (req, res) => {
   try {
-    const updatedPartner = await Partner.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedPartner = await Partner.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     if (!updatedPartner) {
-      return res.status(404).json({ message: 'Partner not found' });
+      return res.status(404).json({ message: "Partner not found" });
     }
     res.status(200).json(updatedPartner);
   } catch (error) {
@@ -92,9 +107,9 @@ export const deletePartner = async (req, res) => {
   try {
     const deletedPartner = await Partner.findByIdAndDelete(req.params.id);
     if (!deletedPartner) {
-      return res.status(404).json({ message: 'Partner not found' });
+      return res.status(404).json({ message: "Partner not found" });
     }
-    res.status(200).json({ message: 'Partner deleted' });
+    res.status(200).json({ message: "Partner deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
