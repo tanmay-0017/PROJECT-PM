@@ -21,9 +21,17 @@ const TimeCalcul = asyncHandler(async (req, res) => {
     return `${diffHrs}:${diffMins}`;
   }
 
-  console.log(calculateTimeDifference(OutTime, InTime));
+  const timeDuration = calculateTimeDifference(OutTime, InTime);
   let time = calculateTimeDifference(OutTime, InTime);
-  res.status(200).json({ customer, time });
+  const customerUpdate = await Customer.findByIdAndUpdate(
+    customer._id,
+    {
+      timeDuration,
+    },
+    { new: true }
+  );
+  console.log(customerUpdate);
+  res.status(200).json(customerUpdate);
 });
 
 export { TimeCalcul };
