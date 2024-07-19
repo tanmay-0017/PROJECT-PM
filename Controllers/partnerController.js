@@ -99,3 +99,24 @@ export const deletePartner = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+export const getCustomersByPartnerName = async (req, res) => {
+  try {
+    const { channelPartnerName } = req.body;
+    const partners = await Partner.find({ channelPartnerName });
+    if (partners.length === 0) {
+      return res.status(404).json({ message: 'No customers found for this partner' });
+    }
+    const customers = partners.map(partner => ({
+      customerName: partner.customerName,
+      customerMobileLastFour: partner.customerMobileLastFour,
+      projectName: partner.projectName,
+      projectLocation: partner.projectLocation
+    }));
+    res.status(200).json(customers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
