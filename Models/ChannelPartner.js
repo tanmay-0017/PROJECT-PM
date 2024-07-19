@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+// const logSchema = new mongoose.Schema({
+//   projectName: { type: String, required: true },
+//   projectLocation: { type: String, required: true },
+//   attendant: { type: mongoose.Schema.Types.ObjectId, ref: 'Attendant', required: true },
+//   attendantName: { type: String, required: true },
+//   team: { type: String, required: true }
+// }, { timestamps: true}, { _id : false });
+
 const partnerSchema = new mongoose.Schema({
   channelPartnerName: String,
   channelPartnerCompanyName: String,
@@ -12,6 +20,7 @@ const partnerSchema = new mongoose.Schema({
   attendantName: { type: String, required: true },
   timeDuration: {type: String, default: "00 : 00"},
   notes: {type: String},
+  // log: [logSchema]
 },
 {
   timestamps: true
