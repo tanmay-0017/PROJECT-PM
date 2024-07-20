@@ -15,6 +15,8 @@ import servicePersonRouter from "./router/servicePersonRouter.js";
 import bodyParser from "body-parser";
 import timeline from "./router/timesheet.routes.js";
 import chequeImage from "./router/ChequeImage.js";
+import salesManagerRouter from "./router/salesManagerRouter.js";
+import teamRouter from "./router/teamRouter.js";
 const app = express();
 app.use(
   cors({
@@ -41,5 +43,7 @@ app.use("/api/servicePerson", servicePersonRouter);
 app.use("/api/timeSheet", timeline);
 app.use("/api/channels", channelRouter);
 app.use("/api/chequeImage", chequeImage);
+app.use("/api/salesManager", salesManagerRouter);
+app.use("/api/teams", teamRouter);
 
 export { app };
