@@ -7,6 +7,6 @@ router.get('/fetch-all', getPartners);
 router.get('/fetch/:id', getPartnerById);
 router.put('/update/:id', updatePartner);
 router.delete('/delete/:id', deletePartner);
-router.get('/fetchByName', getCustomersByPartnerName);
+router.post('/fetchByName', getCustomersByPartnerName);
 
 export default router;
