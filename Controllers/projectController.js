@@ -1,4 +1,5 @@
 import Project from '../Models/projectModel.js';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 // Get all projects
 export const getProjects = async (req, res) => {
@@ -26,12 +27,22 @@ export const getProjectLocation = async (req, res) => {
 
 // Create a new project
 export const createProject = async (req, res) => {
-    const { name, location, teams } = req.body;
+    const { name, location, teams, address } = req.body;
+
+    const projectImageLocalPath = req.files?.projectImage[0]?.path;
+
+    const projectImage = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!projectImageLocalPath) {
+        throw new ApiError(400, "Project Image file is required")
+    }
 
     const newProject = new Project({
         name,
         location,
-        teams
+        teams,
+        address,
+        projectImage : projectImage.url
     });
 
     try {
