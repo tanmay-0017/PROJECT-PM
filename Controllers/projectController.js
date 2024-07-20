@@ -1,4 +1,5 @@
 import Project from '../Models/projectModel.js';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 // Get all projects
 export const getProjects = async (req, res) => {
@@ -25,22 +26,41 @@ export const getProjectLocation = async (req, res) => {
 };
 
 // Create a new project
+// Create a new project
 export const createProject = async (req, res) => {
-    const { name, location, teams } = req.body;
-
-    const newProject = new Project({
-        name,
-        location,
-        teams
-    });
-
     try {
+        const { name, location, teams, address } = req.body;
+
+        // Check if projectImage file is present
+        if (!req.files || !req.files.projectImage || !req.files.projectImage[0]) {
+            return res.status(400).json({ message: "Project Image file is required" });
+        }
+
+        const projectImageLocalPath = req.files.projectImage[0].path;
+
+        // Upload the image to Cloudinary
+        const projectImage = await uploadOnCloudinary(projectImageLocalPath);
+        if (!projectImage) {
+            return res.status(500).json({ message: "Failed to upload project image to Cloudinary" });
+        }
+
+        // Create a new project
+        const newProject = new Project({
+            name,
+            location,
+            teams,
+            address,
+            projectImage: projectImage.url
+        });
+
         const savedProject = await newProject.save();
         res.status(201).json(savedProject);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error("Error creating project:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
+
 
 // Update an existing project
 export const updateProject = async (req, res) => {

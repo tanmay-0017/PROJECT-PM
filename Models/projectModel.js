@@ -12,7 +12,15 @@ const projectSchema = new mongoose.Schema({
     teams: [{
         type: String, // Array of team names
         default : []
-    }]
+    }],
+    address: {
+        type: String,
+        required: true
+    },
+    projectImage: {
+        type: String, // cloudinary url
+        required: true
+    }
 });
 
 const Project = mongoose.model('Project', projectSchema);
