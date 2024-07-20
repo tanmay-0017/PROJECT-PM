@@ -1,4 +1,5 @@
 import express from 'express';
+import { upload } from '../Middlewares/multer.middleware.js';
 import {
     getProjects,
     getProjectLocation,

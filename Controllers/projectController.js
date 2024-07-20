@@ -26,32 +26,41 @@ export const getProjectLocation = async (req, res) => {
 };
 
 // Create a new project
+// Create a new project
 export const createProject = async (req, res) => {
-    const { name, location, teams, address } = req.body;
-
-    const projectImageLocalPath = req.files?.projectImage[0]?.path;
-
-    const projectImage = await uploadOnCloudinary(avatarLocalPath);
-
-    if (!projectImageLocalPath) {
-        throw new ApiError(400, "Project Image file is required")
-    }
-
-    const newProject = new Project({
-        name,
-        location,
-        teams,
-        address,
-        projectImage : projectImage.url
-    });
-
     try {
+        const { name, location, teams, address } = req.body;
+
+        // Check if projectImage file is present
+        if (!req.files || !req.files.projectImage || !req.files.projectImage[0]) {
+            return res.status(400).json({ message: "Project Image file is required" });
+        }
+
+        const projectImageLocalPath = req.files.projectImage[0].path;
+
+        // Upload the image to Cloudinary
+        const projectImage = await uploadOnCloudinary(projectImageLocalPath);
+        if (!projectImage) {
+            return res.status(500).json({ message: "Failed to upload project image to Cloudinary" });
+        }
+
+        // Create a new project
+        const newProject = new Project({
+            name,
+            location,
+            teams,
+            address,
+            projectImage: projectImage.url
+        });
+
         const savedProject = await newProject.save();
         res.status(201).json(savedProject);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error("Error creating project:", error.message);
+        res.status(500).json({ message: error.message });
     }
 };
+
 
 // Update an existing project
 export const updateProject = async (req, res) => {
