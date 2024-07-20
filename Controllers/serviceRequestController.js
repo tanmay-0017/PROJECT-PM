@@ -63,6 +63,13 @@ export const requestService = async (req, res) => {
 };
 
 
+export const getAllRequestService = async (req, res) => {
+    const customer = await ServiceRequest.find({});
+    if (!customer) return res.status(400).json({message : "Customer does not exist"});
+    return res.status(200).json(customer);
+}
+
+
 export const getrequestService = async(req, res) => {
     const {mobileNo} = req.body;
 
