@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import partnerRouter from "./router/partnerRouter.js";
 import customerRoutes from "./router/customerRoutes.js";
-import channelRouter from "./router/channelRouter.js"
+import channelRouter from "./router/channelRouter.js";
 import cors from "cors";
 import logger from "./Middlewares/logger.js";
 import errorMiddleware from "./Middlewares/errorMiddleware.js";
@@ -14,6 +14,7 @@ import serviceRoutes from "./router/serviceRoutes.js";
 import servicePersonRouter from "./router/servicePersonRouter.js";
 import bodyParser from "body-parser";
 import timeline from "./router/timesheet.routes.js";
+import chequeImage from "./router/ChequeImage.js";
 const app = express();
 app.use(
   cors({
@@ -38,7 +39,7 @@ app.use("/api/seviceRequest", serviceRequest);
 app.use("/api/services", serviceRoutes);
 app.use("/api/servicePerson", servicePersonRouter);
 app.use("/api/timeSheet", timeline);
-app.use('/api/channels', channelRouter);
-
+app.use("/api/channels", channelRouter);
+app.use("/api/chequeImage", chequeImage);
 
 export { app };
