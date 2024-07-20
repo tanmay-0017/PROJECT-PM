@@ -129,7 +129,9 @@ export const getCustomersByPartnerName = async (req, res) => {
       customerName: partner.customerName,
       customerMobileLastFour: partner.customerMobileLastFour,
       projectName: partner.projectName,
-      projectLocation: partner.projectLocation
+      projectLocation: partner.projectLocation,
+      createdAt: partner.createdAt,
+      updatedAt: partner.updatedAt
     }));
     res.status(200).json(customers);
   } catch (error) {
