@@ -2,7 +2,7 @@ import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, emailID, project } = req.body;
+  const { name, status, team, emailID, project, phone } = req.body;
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -14,14 +14,18 @@ export const createAttendant = asyncHandler(async (req, res) => {
     employeeId = "ROFEX1";
   }
 
-  Attendant.create({
-    name,
-    status,
-    team,
-    employeeId,
-    emailID,
-    project,
-  });
+  Attendant.create(
+    {
+      name,
+      status,
+      team,
+      employeeId,
+      emailID,
+      project,
+      phone,
+    },
+    { new: true }
+  );
   res.status(201).json({
     name,
     status,
@@ -29,6 +33,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
     employeeId,
     emailID,
     project,
+    phone,
   });
 });
 
@@ -91,4 +96,22 @@ export const deleteAttendant = asyncHandler(async (req, res) => {
   if (!attendant)
     return res.status(404).json({ message: "Attendant not found" });
   res.status(200).json({ message: "Attendant deleted" });
+});
+
+export const addTeamMember = asyncHandler(async (req, res) => {
+  const { employeeId, emailID, name, team, project } = req.body;
+  const teamMember = await Attendant.findOne({ employeeId: employeeId });
+  console.log("teamMember", teamMember);
+  const assignedTeamMember = await Attendant.findByIdAndUpdate(
+    teamMember._id,
+    {
+      team,
+      project,
+    },
+    { new: true }
+  );
+
+  console.log(assignedTeamMember);
+
+  return res.status(200).json(assignedTeamMember);
 });
