@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const createlog = new mongoose.Schema({
-  ClientName: { type: String, required: true },
-  ClientId: { type: String, required: true },
+  ClientName: { type: String },
+  ClientId: { type: String },
 });
 
 const attendantSchema = new mongoose.Schema(
@@ -18,7 +18,6 @@ const attendantSchema = new mongoose.Schema(
     },
     team: {
       type: String,
-      required: true,
     },
     employeeId: {
       type: String,
@@ -30,6 +29,9 @@ const attendantSchema = new mongoose.Schema(
     },
     ClientName: [createlog],
     project: {
+      type: String,
+    },
+    phone: {
       type: String,
     },
   },
