@@ -11,7 +11,7 @@ export const createPartner = async (req, res) => {
       customerMobileLastFour,
       projectName,
       projectLocation,
-      notes
+      notes,
     } = req.body;
 
     const project = await Project.findOne({
@@ -47,6 +47,18 @@ export const createPartner = async (req, res) => {
     } else {
       partnerId = "CHROF1";
     }
+    const AttendantData = await Attendant.findByIdAndUpdate(
+      availableAttendant._id,
+      {
+        $push: {
+          ClientName: {
+            ClientName: customerName,
+            ClientId: partnerId,
+          },
+        },
+      },
+      { new: true }
+    );
 
     const newPartner = await Partner.create({
       channelPartnerName,
@@ -116,22 +128,22 @@ export const deletePartner = async (req, res) => {
   }
 };
 
-
-
 export const getCustomersByPartnerName = async (req, res) => {
   try {
     const { channelPartnerName } = req.body;
     const partners = await Partner.find({ channelPartnerName });
     if (partners.length === 0) {
-      return res.status(404).json({ message: 'No customers found for this partner' });
+      return res
+        .status(404)
+        .json({ message: "No customers found for this partner" });
     }
-    const customers = partners.map(partner => ({
+    const customers = partners.map((partner) => ({
       customerName: partner.customerName,
       customerMobileLastFour: partner.customerMobileLastFour,
       projectName: partner.projectName,
       projectLocation: partner.projectLocation,
       createdAt: partner.createdAt,
-      updatedAt: partner.updatedAt
+      updatedAt: partner.updatedAt,
     }));
     res.status(200).json(customers);
   } catch (error) {

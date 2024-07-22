@@ -130,26 +130,24 @@ export const createCustomer = asyncHandler(async (req, res) => {
     { new: true }
   );
 
+  console.log("availableAttendant", availableAttendant);
+  if (!availableAttendant) {
+    return res
+      .status(400)
+      .json({ message: "No available attendants of same team." });
+  }
   const AttendantData = await Attendant.findByIdAndUpdate(
     availableAttendant._id,
     {
       $push: {
         ClientName: {
           ClientName: name,
-          ClientId: mobileFound.customerId,
+          ClientId: customerId,
         },
       },
     },
     { new: true }
   );
-
-  console.log(AttendantData);
-
-  if (!availableAttendant) {
-    return res
-      .status(400)
-      .json({ message: "No available attendants of same team." });
-  }
 
   Customer.create({
     name,
