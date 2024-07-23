@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 const router = express.Router();
 import {
   getServices,
@@ -7,17 +7,18 @@ import {
   updateServiceById,
   deleteService,
   makeservicePersonAvailable,
-  makeAllServicePersonAvailable
-} from '../Controllers/servicePersonController.js';
+  makeAllServicePersonAvailable,
+} from "../Controllers/servicePersonController.js";
 
-router.route('/makeAllServicePersonAvailable').put(makeAllServicePersonAvailable);
-router.route('/').get(getServices).post(createServicePerson);
 router
-  .route('/:id')
+  .route("/makeAllServicePersonAvailable")
+  .put(makeAllServicePersonAvailable);
+router.route("/").get(getServices).post(createServicePerson);
+router
+  .route("/:id")
   .get(getServicePersonById)
   .put(updateServiceById)
   .delete(deleteService);
-
-router.route('/servicePersonAvailable/:id').put(makeservicePersonAvailable);
+router.route("/servicePersonAvailable/:id").put(makeservicePersonAvailable);
 
 export default router;
