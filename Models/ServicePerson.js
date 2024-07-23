@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const servicePersonSchema = new mongoose.Schema({
   type: {
@@ -11,11 +11,11 @@ const servicePersonSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'assigned'],
-    default: 'available'
-  }
+    enum: ["available", "assigned"],
+    default: "available",
+  },
 });
 
-const ServicePerson = mongoose.model('ServicePerson', servicePersonSchema);
+const ServicePerson = mongoose.model("ServicePerson", servicePersonSchema);
 
 export default ServicePerson;
