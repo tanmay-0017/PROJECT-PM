@@ -1,6 +1,6 @@
 import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
-
+/*
 export const createAttendant = asyncHandler(async (req, res) => {
   const { name, status, team, emailID, project, phone } = req.body;
 
@@ -35,6 +35,44 @@ export const createAttendant = asyncHandler(async (req, res) => {
     project,
     phone,
   });
+});
+*/
+
+export const createAttendant = asyncHandler(async (req, res) => {
+  const { name, status, team, emailID, project, phone } = req.body;
+
+  if (!name || !emailID) {
+    return res
+      .status(400)
+      .json({ message: "Name and EmailID are required fields." });
+  }
+
+  const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
+  let employeeId;
+
+  if (lastemployee && lastemployee.employeeId) {
+    const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(5));
+    employeeId = `ROFEX${(lastemployeeIdNum + 1).toString()}`;
+  } else {
+    employeeId = "ROFEX1";
+  }
+
+  const newAttendant = new Attendant({
+    name,
+    status,
+    team,
+    employeeId,
+    emailID,
+    project,
+    phone,
+  });
+
+  try {
+    const savedAttendant = await newAttendant.save();
+    res.status(201).json(savedAttendant);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
 
 export const getAttendants = asyncHandler(async (req, res) => {

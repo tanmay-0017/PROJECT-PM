@@ -34,6 +34,9 @@ const attendantSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
+    managerName: {
+      type: String,
+    },
   },
   {
     timestamps: true,
