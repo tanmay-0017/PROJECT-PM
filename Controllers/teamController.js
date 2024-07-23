@@ -29,7 +29,8 @@ export const createTeam = async (req, res) => {
     const existingTeam = await Team.findOne({ teamName });
 
     if (existingTeam) {
-      existingTeam.teamMemberNames.push(teamMemberName);
+      // Add the new team member names to the existing team's teamMemberNames array
+      existingTeam.teamMemberNames = Array.from(new Set([...existingTeam.teamMemberNames, ...teamMemberName]));
       await existingTeam.save();
       return res.status(200).json(existingTeam);
     }
@@ -41,7 +42,7 @@ export const createTeam = async (req, res) => {
       projectName,
       managerName,
       managerEmail: salesManager.email,
-      teamMemberNames: [teamMemberName]
+      teamMemberNames: teamMemberName
     });
 
     res.status(201).json(team);
