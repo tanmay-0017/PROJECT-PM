@@ -1,6 +1,6 @@
 import express from "express";
 import { upload } from "../Middlewares/multer.middleware.js";
-import { ChequeImage, getChequeImages, getAllCheques } from "../Controllers/chequeImage.js";
+import { ChequeImage, getChequeImages, getAllCheques, getEntriesWithChequeImage } from "../Controllers/chequeImage.js";
 const router = express.Router();
 router.post(
   "/save",
@@ -16,5 +16,7 @@ router.post(
 router.get('/fetch', getChequeImages);
 
 router.get('/fetch-all', getAllCheques);
+
+router.get('/entries-with-cheque-image', getEntriesWithChequeImage);
 
 export default router;
