@@ -121,3 +121,48 @@ export const getAllCheques = asyncHandler(async (req, res) => {
 
   res.status(200).json(allCheques);
 });
+
+
+
+
+
+
+export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
+  try {
+    // Find customers with non-empty chequeImage arrays
+    const customersWithChequeImage = await Customer.find({
+      chequeImage: { $exists: true, $not: { $size: 0 } },
+    }).select('chequeImage createdAt').lean();
+
+    // Find partners with non-empty chequeImage arrays
+    const partnersWithChequeImage = await Partner.find({
+      chequeImage: { $exists: true, $not: { $size: 0 } },
+    }).select('chequeImage createdAt').lean();
+
+    // Combine and format results
+    const entriesWithChequeImage = [
+      ...customersWithChequeImage.map((customer) => ({
+        type: 'customer',
+        id: customer._id,
+        chequeImage: customer.chequeImage,
+        createdAt: customer.createdAt,
+      })),
+      ...partnersWithChequeImage.map((partner) => ({
+        type: 'partner',
+        id: partner._id,
+        chequeImage: partner.chequeImage,
+        createdAt: partner.createdAt,
+      })),
+    ];
+
+    // Sort by createdAt in descending order
+    entriesWithChequeImage.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Send the response
+    res.status(200).json(entriesWithChequeImage);
+  } catch (error) {
+    console.error("Error fetching entries with cheque images:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
