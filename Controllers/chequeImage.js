@@ -77,9 +77,6 @@ export const ChequeImage = asyncHandler(async (req, res) => {
   res.status(201).json(updatedChequeImage);
 });
 
-
-
-
 export const getChequeImages = asyncHandler(async (req, res) => {
   const { customerId, partnerId } = req.query;
 
@@ -99,18 +96,22 @@ export const getChequeImages = asyncHandler(async (req, res) => {
 
 // GET Handler for all cheques
 export const getAllCheques = asyncHandler(async (req, res) => {
-  const customers = await Customer.find({}).select('chequeImage createdAt').lean();
-  const partners = await Partner.find({}).select('chequeImage createdAt').lean();
+  const customers = await Customer.find({})
+    .select("chequeImage createdAt")
+    .lean();
+  const partners = await Partner.find({})
+    .select("chequeImage createdAt")
+    .lean();
 
   const allCheques = [
-    ...customers.map(customer => ({
-      type: 'customer',
+    ...customers.map((customer) => ({
+      type: "customer",
       id: customer._id,
       chequeImage: customer.chequeImage,
       createdAt: customer.createdAt,
     })),
-    ...partners.map(partner => ({
-      type: 'partner',
+    ...partners.map((partner) => ({
+      type: "partner",
       id: partner._id,
       chequeImage: partner.chequeImage,
       createdAt: partner.createdAt,
@@ -123,35 +124,32 @@ export const getAllCheques = asyncHandler(async (req, res) => {
   res.status(200).json(allCheques);
 });
 
-
-
-
-
-
 export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
   const { name } = req.body;
-  const project = await Project.findOne({projectName : name});
-  if (!project) return res.json({message : "Project not found"});
+  const project = await Project.findOne({ name });
+  if (!project) return res.json({ message: "Project not found" });
 
   try {
     // Find customers with non-empty chequeImage arrays
     const customersWithChequeImage = await Customer.find({
       chequeImage: { $exists: true, $not: { $size: 0 } },
     })
-      .select('chequeImage createdAt name mobile projectName')
+      .select("chequeImage createdAt name mobile projectName")
       .lean();
 
     // Find partners with non-empty chequeImage arrays
     const partnersWithChequeImage = await Partner.find({
       chequeImage: { $exists: true, $not: { $size: 0 } },
     })
-      .select('chequeImage createdAt customerName customerMobileLastFour projectName')
+      .select(
+        "chequeImage createdAt customerName customerMobileLastFour projectName"
+      )
       .lean();
 
     // Combine and format results
     const entriesWithChequeImage = [
       ...customersWithChequeImage.map((customer) => ({
-        type: 'customer',
+        type: "customer",
         id: customer._id,
         chequeImage: customer.chequeImage,
         createdAt: customer.createdAt,
@@ -160,7 +158,7 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
         projectName: customer.projectName,
       })),
       ...partnersWithChequeImage.map((partner) => ({
-        type: 'partner',
+        type: "partner",
         id: partner._id,
         chequeImage: partner.chequeImage,
         createdAt: partner.createdAt,
@@ -171,13 +169,16 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
     ];
 
     // Sort by createdAt in descending order
-    entriesWithChequeImage.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+    entriesWithChequeImage.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    const filteredEntries = entriesWithChequeImage.filter(
+      (entry) => entry.projectName === name
+    );
     // Send the response
-    res.status(200).json(entriesWithChequeImage);
+    res.status(200).json(filteredEntries);
   } catch (error) {
     console.error("Error fetching entries with cheque images:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
