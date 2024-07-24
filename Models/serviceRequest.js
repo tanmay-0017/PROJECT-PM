@@ -33,12 +33,14 @@ const serviceRequestSchema = mongoose.Schema(
     statusService: {
       type: String,
       enum: ["Resolved", "Pending", "Disputed"],
+      default: "Pending",
     },
-    Feedback: {
+    feedback: {
       type: String,
     },
     star: {
       type: String,
+      default: "1",
     },
   },
   {
