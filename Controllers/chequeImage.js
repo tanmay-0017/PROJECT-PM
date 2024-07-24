@@ -134,7 +134,7 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
     const customersWithChequeImage = await Customer.find({
       chequeImage: { $exists: true, $not: { $size: 0 } },
     })
-      .select("chequeImage createdAt name mobile projectName")
+      .select("chequeImage createdAt name mobile projectName customerId")
       .lean();
 
     // Find partners with non-empty chequeImage arrays
@@ -142,7 +142,7 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
       chequeImage: { $exists: true, $not: { $size: 0 } },
     })
       .select(
-        "chequeImage createdAt customerName customerMobileLastFour projectName"
+        "chequeImage createdAt customerName customerMobileLastFour projectName partnerId"
       )
       .lean();
 
@@ -156,6 +156,7 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
         name: customer.name,
         mobile: customer.mobile,
         projectName: customer.projectName,
+        customerId: customer.customerId,
       })),
       ...partnersWithChequeImage.map((partner) => ({
         type: "partner",
@@ -165,6 +166,7 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
         customerName: partner.customerName,
         customerMobileLastFour: partner.customerMobileLastFour,
         projectName: partner.projectName,
+        partnerId: partner.partnerId,
       })),
     ];
 
