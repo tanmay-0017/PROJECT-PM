@@ -116,3 +116,16 @@ export const statusFeedbackAndStar = async (req, res) => {
   console.log(updated);
   return res.status(200).json(updated);
 };
+
+export const ProjectFilter = async (req, res) => {
+  const { name } = req.body;
+  try {
+    if (!name) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    const project = await ServiceRequest.find({ projectName: name });
+    return res.status(200).json(project);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
