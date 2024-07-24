@@ -304,8 +304,6 @@ export const addonemember = async (req, res) => {
       })
     );
 
-    console.log("Attendants after update:", attendants);
-
     // Ensure there are valid attendants to push
     const validAttendants = attendants.filter((attendant) => attendant);
     if (validAttendants.length === 0) {
@@ -336,8 +334,6 @@ export const addonemember = async (req, res) => {
       },
       { new: true }
     );
-
-    console.log("TeamMemberadd after update:", teamUpdate);
 
     if (!teamUpdate) {
       console.log("No team found to update.");
