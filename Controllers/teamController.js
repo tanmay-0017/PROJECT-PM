@@ -394,3 +394,16 @@ export const deleteTeams = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const teamfliter = async (req, res) => {
+  const { teamName } = req.body;
+  try {
+    const fliterdata = await Team.findOne({ teamName: teamName });
+    if (!fliterdata) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+    return res.status(200).json(fliterdata);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
