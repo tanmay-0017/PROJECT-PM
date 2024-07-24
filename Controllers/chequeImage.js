@@ -1,5 +1,6 @@
 import Partner from "../Models/ChannelPartner.js";
 import Customer from "../Models/customer.js";
+import Project from "../Models/projectModel.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -128,16 +129,24 @@ export const getAllCheques = asyncHandler(async (req, res) => {
 
 
 export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
+  const { name } = req.body;
+  const project = await Project.findOne({projectName : name});
+  if (!project) return res.json({message : "Project not found"});
+
   try {
     // Find customers with non-empty chequeImage arrays
     const customersWithChequeImage = await Customer.find({
       chequeImage: { $exists: true, $not: { $size: 0 } },
-    }).select('chequeImage createdAt').lean();
+    })
+      .select('chequeImage createdAt name mobile projectName')
+      .lean();
 
     // Find partners with non-empty chequeImage arrays
     const partnersWithChequeImage = await Partner.find({
       chequeImage: { $exists: true, $not: { $size: 0 } },
-    }).select('chequeImage createdAt').lean();
+    })
+      .select('chequeImage createdAt customerName customerMobileLastFour projectName')
+      .lean();
 
     // Combine and format results
     const entriesWithChequeImage = [
@@ -146,12 +155,18 @@ export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
         id: customer._id,
         chequeImage: customer.chequeImage,
         createdAt: customer.createdAt,
+        name: customer.name,
+        mobile: customer.mobile,
+        projectName: customer.projectName,
       })),
       ...partnersWithChequeImage.map((partner) => ({
         type: 'partner',
         id: partner._id,
         chequeImage: partner.chequeImage,
         createdAt: partner.createdAt,
+        customerName: partner.customerName,
+        customerMobileLastFour: partner.customerMobileLastFour,
+        projectName: partner.projectName,
       })),
     ];
 
