@@ -1,5 +1,6 @@
 import Partner from "../Models/ChannelPartner.js";
 import Customer from "../Models/customer.js";
+import Project from "../Models/projectModel.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -128,6 +129,10 @@ export const getAllCheques = asyncHandler(async (req, res) => {
 
 
 export const getEntriesWithChequeImage = asyncHandler(async (req, res) => {
+  const { name } = req.body;
+  const project = await Project.findOne({projectName : name});
+  if (!project) return res.json({message : "Project not found"});
+
   try {
     // Find customers with non-empty chequeImage arrays
     const customersWithChequeImage = await Customer.find({
