@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import Attendant from "../Models/Attendant.js";
 import Project from "../Models/projectModel.js";
 import { v4 as uuidv4 } from "uuid";
+import Team from "../Models/teamModel.js";
 
 export const createCustomer = asyncHandler(async (req, res) => {
   const { name, email, mobile, projectName, projectLocation, notes } = req.body;
@@ -24,25 +25,68 @@ export const createCustomer = asyncHandler(async (req, res) => {
       { new: true }
     );
 
+    if (!availableAttendant) {
+      return res
+        .status(400)
+        .json({ message: "No available attendants of same team." });
+    }
+
+    const newClient = {
+      ClientName: name,
+      ClientId: mobileFound.customerId,
+    };
+
     const AttendantData = await Attendant.findByIdAndUpdate(
       availableAttendant._id,
       {
         $push: {
-          ClientName: {
-            ClientName: name,
-            ClientId: mobileFound.customerId,
-          },
+          ClientName: newClient,
         },
       },
       { new: true }
     );
 
-    console.log(AttendantData);
-    if (!availableAttendant && AttendantData) {
-      return res
-        .status(400)
-        .json({ message: "No available attendants of same team." });
+
+    const employeeIdFromAttendant = availableAttendant.employeeId;
+
+    // Retrieve all client names for the attendant
+    const attendant = await Attendant.findById(availableAttendant._id);
+    // const clientNames = attendant.ClientName.map((client) => client.ClientName);
+    const clientNames = attendant.ClientName;
+
+    // Update team member names with all client names
+    const teamsUpdated = await Team.updateMany(
+      { "teamMemberNames.employeeId": employeeIdFromAttendant },
+      {
+        $set: { "teamMemberNames.$[elem].ClientName": clientNames },
+      },
+      {
+        arrayFilters: [{ "elem.employeeId": employeeIdFromAttendant }],
+        new: true,
+      }
+    );
+
+    if (!teamsUpdated.matchedCount) {
+      return res.status(404).json({ message: "Team members not found." });
     }
+
+    // const clientNameFromAttendant = availableAttendant.ClientName;
+    // const employeeIdFromAttendant = availableAttendant.employeeId;
+
+    // const teamToUpdate = await Team.find({teamMemberNames.map().employeeId : employeeIdFromAttendant});
+
+
+    // await Team.findByIdAndUpdate(
+    //   teamToUpdate._id,
+    //   {
+    //     teamToUpdate.teamMemberNames.ClientName: clientNameFromAttendant;
+    //   },
+    //   {new : true}
+    // )
+
+    // await Team.find({teamMemberNames})
+
+    console.log(AttendantData);
 
     // Customer.create({
     //     name,
@@ -136,6 +180,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
       .status(400)
       .json({ message: "No available attendants of same team." });
   }
+
   const AttendantData = await Attendant.findByIdAndUpdate(
     availableAttendant._id,
     {
@@ -148,6 +193,29 @@ export const createCustomer = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+
+  const employeeIdFromAttendant = availableAttendant.employeeId;
+
+    // Retrieve all client names for the attendant
+    const attendant = await Attendant.findById(availableAttendant._id);
+    const clientNames = attendant.ClientName.map((client) => client.ClientName);
+
+    // Update team member names with all client names
+    const teamsUpdated = await Team.updateMany(
+      { "teamMemberNames.employeeId": employeeIdFromAttendant },
+      {
+        $set: { "teamMemberNames.$[elem].ClientName": clientNames },
+      },
+      {
+        arrayFilters: [{ "elem.employeeId": employeeIdFromAttendant }],
+        new: true,
+      }
+    );
+
+    if (!teamsUpdated.matchedCount) {
+      return res.status(404).json({ message: "Team members not found." });
+    }
+    
 
   Customer.create({
     name,
