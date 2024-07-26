@@ -403,3 +403,92 @@ export const teamfliter = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/*
+export const updateSalesManagerTeam = async (req, res) => {
+  const { id } = req.params;
+  const { managerName, teamName } = req.body;
+  try {
+    const AllDataInTeam = await Team.findByIdAndUpdate(
+      id,
+      {
+        managerName,
+        $set: {
+          teamMemberNames: {
+            $each: validAttendants.map((attendant) => ({
+              managerName,
+            })),
+          },
+        },
+      },
+      { new: true }
+    );
+    console.log("AllDataInTeam", AllDataInTeam);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateSalesManagerTeam = async (req, res) => {
+  const { id } = req.params;
+  const { managerName } = req.body;
+  try {
+    // Find the team document by ID
+    const team = await Team.findById(id);
+    console.log("team", team);
+    if (!team) {
+      console.log("team not found", team);
+      return res.status(404).json({ message: "Team not found" });
+    }
+    console.log("team out", team);
+
+    const updatePromises = team.teamMemberNames.map(async (memberId) => {
+      return teamMemberNames.updateOne(
+        { _id: memberId },
+        { $set: { managerName } }
+      );
+    });
+    await Promise.all(updatePromises);
+    const updatedTeam = await Team.findByIdAndUpdate(
+      id,
+      { managerName },
+      { new: true }
+    );
+    
+
+    console.log("UpdatedTeam", updatedTeam);
+    res.status(200).json(updatedTeam);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+*/
+
+export const updateSalesManagerTeam = async (req, res) => {
+  const { id } = req.params;
+  const { managerName } = req.body;
+  try {
+    // Find the team document by ID
+    const team = await Team.findById(id);
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    // Update managerName for each team member in the team
+    const updatedTeam = await Team.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          managerName,
+          "teamMemberNames.$[].managerName": managerName, // Update managerName for all team members
+        },
+      },
+      { new: true }
+    );
+
+    console.log("UpdatedTeam", updatedTeam);
+    res.status(200).json(updatedTeam);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
