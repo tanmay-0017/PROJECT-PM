@@ -1,4 +1,4 @@
-import SalesManager from '../Models/salesManager.js';
+import SalesManager from "../Models/salesManager.js";
 
 // Create a new Sales Manager
 export const createSalesManager = async (req, res) => {
@@ -26,7 +26,8 @@ export const getSalesManagers = async (req, res) => {
 export const getSalesManagerById = async (req, res) => {
   try {
     const salesManager = await SalesManager.findById(req.params.id);
-    if (!salesManager) return res.status(404).json({ message: 'Sales Manager not found' });
+    if (!salesManager)
+      return res.status(404).json({ message: "Sales Manager not found" });
     res.status(200).json(salesManager);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -37,8 +38,13 @@ export const getSalesManagerById = async (req, res) => {
 export const updateSalesManager = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
-    const salesManager = await SalesManager.findByIdAndUpdate(req.params.id, { name, email, phone }, { new: true });
-    if (!salesManager) return res.status(404).json({ message: 'Sales Manager not found' });
+    const salesManager = await SalesManager.findByIdAndUpdate(
+      req.params.id,
+      { name, email, phone },
+      { new: true }
+    );
+    if (!salesManager)
+      return res.status(404).json({ message: "Sales Manager not found" });
     res.status(200).json(salesManager);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -49,8 +55,9 @@ export const updateSalesManager = async (req, res) => {
 export const deleteSalesManager = async (req, res) => {
   try {
     const salesManager = await SalesManager.findByIdAndDelete(req.params.id);
-    if (!salesManager) return res.status(404).json({ message: 'Sales Manager not found' });
-    res.status(200).json({ message: 'Sales Manager deleted' });
+    if (!salesManager)
+      return res.status(404).json({ message: "Sales Manager not found" });
+    res.status(200).json({ message: "Sales Manager deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

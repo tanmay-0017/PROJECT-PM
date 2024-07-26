@@ -7,6 +7,7 @@ import {
   deleteTeams,
   addonemember,
   teamfliter,
+  updateSalesManagerTeam,
 } from "../Controllers/teamController.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post("/teamfliter", teamfliter);
 router.get("/fetch-all", getAllTeams);
 router.get("/:id", getTeamsById);
 router.put("/:id", updateTeams);
+router.put("/updateSalesManagerTeam/:id", updateSalesManagerTeam);
 router.delete("/:id", deleteTeams);
 
 export default router;
