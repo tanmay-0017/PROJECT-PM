@@ -18,6 +18,7 @@ import chequeImage from "./router/ChequeImage.js";
 import salesManagerRouter from "./router/salesManagerRouter.js";
 import teamRouter from "./router/teamRouter.js";
 import clientManagement from "./router/clientManagementRoutes.js";
+import adminRouter from "./router/adminRouter.js";
 
 const app = express();
 app.use(
@@ -53,5 +54,6 @@ app.use("/api/chequeImage", chequeImage);
 app.use("/api/salesManager", salesManagerRouter);
 app.use("/api/teams", teamRouter);
 app.use("/api/clientManagement", clientManagement);
+app.use("/api/admin", adminRouter)
 
 export { app };
