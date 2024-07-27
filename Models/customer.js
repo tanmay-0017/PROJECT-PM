@@ -12,16 +12,14 @@ const logSchema = new mongoose.Schema(
     attendantName: { type: String, required: true },
     team: { type: String, required: true },
   },
-  { timestamps: true },
-  { _id: false }
+  { timestamps: true, _id: false }
 );
 
 const chequeImages = new mongoose.Schema(
   {
     chequeImages: { type: String },
   },
-  { timestamps: true },
-  { _id: false }
+  { timestamps: true, _id: false }
 );
 
 const customerSchema = new mongoose.Schema(

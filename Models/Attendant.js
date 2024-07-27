@@ -1,9 +1,27 @@
 import mongoose from "mongoose";
 
-const createlog = new mongoose.Schema({
-  ClientName: { type: String },
-  ClientId: { type: String },
-});
+const createlog = new mongoose.Schema(
+  {
+    ClientName: { type: String },
+    ClientId: { type: String },
+    ClientEmail: { type: String },
+    ClientMobile: { type: String },
+    ClientProject: { type: String },
+    completed: {
+      type: String,
+      enum: ["completed", "notCompleted", "progress"],
+      default: "progress",
+    },
+    accepted: {
+      type: String,
+      enum: ["accepted", "rejected", "pending"],
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const attendantSchema = new mongoose.Schema(
   {
@@ -36,6 +54,9 @@ const attendantSchema = new mongoose.Schema(
     },
     managerName: {
       type: String,
+    },
+    endTime: {
+      type: Date,
     },
   },
   {

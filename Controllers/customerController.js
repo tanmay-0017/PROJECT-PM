@@ -8,9 +8,9 @@ import Team from "../Models/teamModel.js";
 export const createCustomer = asyncHandler(async (req, res) => {
   const { name, email, mobile, projectName, projectLocation, notes } = req.body;
   const mobileFound = await Customer.findOne({ mobile });
+  let customerId;
+
   if (mobileFound) {
-    // return res.status(400).json({ message: 'This customer already exits.' });
-    // if (mobileFound.name != name) return res.status(400).json({ message: 'Customer Name does not match' });
     const project = await Project.findOne({ name: projectName });
     if (!project) {
       return res.status(400).json({ message: "Project not found." });
@@ -28,15 +28,20 @@ export const createCustomer = asyncHandler(async (req, res) => {
     if (!availableAttendant) {
       return res
         .status(400)
-        .json({ message: "No available attendants of same team." });
+        .json({ message: "No available attendants of the same team." });
     }
 
     const newClient = {
       ClientName: name,
-      ClientId: mobileFound.customerId,
+      ClientId: customerId,
+      ClientEmail: email,
+      ClientMobile: mobile,
+      ClientProject: projectName,
+      completed: 'progress',
+      accepted: 'pending',
     };
 
-    const AttendantData = await Attendant.findByIdAndUpdate(
+    await Attendant.findByIdAndUpdate(
       availableAttendant._id,
       {
         $push: {
@@ -46,19 +51,20 @@ export const createCustomer = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-
     const employeeIdFromAttendant = availableAttendant.employeeId;
 
     // Retrieve all client names for the attendant
     const attendant = await Attendant.findById(availableAttendant._id);
-    // const clientNames = attendant.ClientName.map((client) => client.ClientName);
     const clientNames = attendant.ClientName;
 
     // Update team member names with all client names
+    // Add client names to the ClientName array of the matched team member
     const teamsUpdated = await Team.updateMany(
       { "teamMemberNames.employeeId": employeeIdFromAttendant },
       {
-        $set: { "teamMemberNames.$[elem].ClientName": clientNames },
+        $addToSet: {
+          "teamMemberNames.$[elem].ClientName": { $each: clientNames },
+        },
       },
       {
         arrayFilters: [{ "elem.employeeId": employeeIdFromAttendant }],
@@ -66,39 +72,10 @@ export const createCustomer = asyncHandler(async (req, res) => {
       }
     );
 
+
     if (!teamsUpdated.matchedCount) {
       return res.status(404).json({ message: "Team members not found." });
     }
-
-    // const clientNameFromAttendant = availableAttendant.ClientName;
-    // const employeeIdFromAttendant = availableAttendant.employeeId;
-
-    // const teamToUpdate = await Team.find({teamMemberNames.map().employeeId : employeeIdFromAttendant});
-
-
-    // await Team.findByIdAndUpdate(
-    //   teamToUpdate._id,
-    //   {
-    //     teamToUpdate.teamMemberNames.ClientName: clientNameFromAttendant;
-    //   },
-    //   {new : true}
-    // )
-
-    // await Team.find({teamMemberNames})
-
-    console.log(AttendantData);
-
-    // Customer.create({
-    //     name,
-    //     email,
-    //     mobile,
-    //     projectName,
-    //     projectLocation,
-    //     customerId: mobileFound.customerId,
-    //     attendant: availableAttendant._id,
-    //     attendantName: availableAttendant.name,
-    //     team: availableAttendant.team
-    // })
 
     const updatedCustomer = await Customer.findByIdAndUpdate(
       mobileFound._id,
@@ -129,135 +106,101 @@ export const createCustomer = asyncHandler(async (req, res) => {
     );
 
     return res.status(201).json(updatedCustomer);
-  }
-  // const customerId = uuidv4();
-
-  const customers = await Customer.find({});
-  // const customerId = `ROFC${(customers.length + 1).toString()}`;
-
-  // var i = 1;
-  // while (Customer.findOne({customerId: customerId})){
-  //     customerId = `ROFC${(customers.length + i).toString()}`;
-  //     i++;
-  // }
-
-  const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
-  let customerId;
-  if (lastCustomer) {
-    const lastCustomerIdNum = parseInt(lastCustomer.customerId.substring(4));
-    customerId = `ROFC${(lastCustomerIdNum + 1).toString()}`;
   } else {
-    customerId = "ROFC1";
-  }
+    const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
 
-  // const lastCustomer = await Customer.findOne().sort({ customerId: -1 });
-  // console.log(lastCustomer);
-  // let newCustomerId;
-  // if (lastCustomer) {
-  //     const lastIdNum = parseInt(lastCustomer.customerId.substr(4));
-  //     newCustomerId = `ROFC${(lastIdNum + 1).toString()}`;
-  // } else {
-  //     newCustomerId = 'ROFC1';
-  // }
+    if (lastCustomer) {
+      const lastCustomerIdNum = parseInt(lastCustomer.customerId.substring(4));
+      customerId = `ROFC${(lastCustomerIdNum + 1).toString()}`;
+    } else {
+      customerId = "ROFC1";
+    }
 
-  const project = await Project.findOne({ name: projectName });
-  if (!project) {
-    return res.status(400).json({ message: "Project not found." });
-  }
-  const teams = project.teams;
+    const project = await Project.findOne({ name: projectName });
+    if (!project) {
+      return res.status(400).json({ message: "Project not found." });
+    }
+    const teams = project.teams;
 
-  const availableAttendant = await Attendant.findOneAndUpdate(
-    { status: "available", team: { $in: teams } },
-    {
-      status: "assigned",
-    },
-    { new: true }
-  );
+    const availableAttendant = await Attendant.findOneAndUpdate(
+      { status: "available", team: { $in: teams } },
+      {
+        status: "assigned",
+      },
+      { new: true }
+    );
 
-  console.log("availableAttendant", availableAttendant);
-  if (!availableAttendant) {
-    return res
-      .status(400)
-      .json({ message: "No available attendants of same team." });
-  }
+    if (!availableAttendant) {
+      return res
+        .status(400)
+        .json({ message: "No available attendants of the same team." });
+    }
 
-  const AttendantData = await Attendant.findByIdAndUpdate(
-    availableAttendant._id,
-    {
-      $push: {
-        ClientName: {
-          ClientName: name,
-          ClientId: customerId,
+    await Attendant.findByIdAndUpdate(
+      availableAttendant._id,
+      {
+        $push: {
+          ClientName: {
+            ClientName: name,
+            ClientId: customerId,
+            ClientEmail: email,
+            ClientMobile: mobile,
+            ClientProject: projectName,
+          },
         },
       },
-    },
-    { new: true }
-  );
+      { new: true }
+    );
 
-  const employeeIdFromAttendant = availableAttendant.employeeId;
+    const employeeIdFromAttendant = availableAttendant.employeeId;
 
     // Retrieve all client names for the attendant
     const attendant = await Attendant.findById(availableAttendant._id);
-    const clientNames = attendant.ClientName.map((client) => client.ClientName);
+    const clientNames = attendant.ClientName.map(
+      (client) => client.ClientName
+    );
 
     // Update team member names with all client names
     const teamsUpdated = await Team.updateMany(
       { "teamMemberNames.employeeId": employeeIdFromAttendant },
       {
-        $set: { "teamMemberNames.$[elem].ClientName": clientNames },
+        $addToSet: { "teamMemberNames.$[elem].ClientName": { $each: clientNames } },
       },
       {
         arrayFilters: [{ "elem.employeeId": employeeIdFromAttendant }],
         new: true,
       }
     );
+    
 
     if (!teamsUpdated.matchedCount) {
       return res.status(404).json({ message: "Team members not found." });
     }
-    
 
-  Customer.create({
-    name,
-    email,
-    mobile,
-    projectName,
-    projectLocation,
-    customerId,
-    attendant: availableAttendant._id,
-    attendantName: availableAttendant.name,
-    team: availableAttendant.team,
-    notes,
-    log: [
-      {
-        projectName,
-        projectLocation,
-        attendant: availableAttendant._id,
-        attendantName: availableAttendant.name,
-        team: availableAttendant.team,
-      },
-    ],
-  });
-  res.status(201).json({
-    name,
-    email,
-    mobile,
-    projectName,
-    projectLocation,
-    customerId,
-    attendantName: availableAttendant.name,
-    team: availableAttendant.team,
-    notes,
-    log: [
-      {
-        projectName,
-        projectLocation,
-        attendant: availableAttendant._id,
-        attendantName: availableAttendant.name,
-        team: availableAttendant.team,
-      },
-    ],
-  });
+    const newCustomer = await Customer.create({
+      name,
+      email,
+      mobile,
+      projectName,
+      projectLocation,
+      customerId,
+      attendant: availableAttendant._id,
+      attendantName: availableAttendant.name,
+      team: availableAttendant.team,
+      notes,
+      log: [
+        {
+          projectName,
+          projectLocation,
+          attendant: availableAttendant._id,
+          attendantName: availableAttendant.name,
+          team: availableAttendant.team,
+        },
+      ],
+    });
+
+    return res.status(201).json(newCustomer);
+  }
 });
 
 // export const createCustomer = asyncHandler(async (req, res) => {
