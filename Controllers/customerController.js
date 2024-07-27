@@ -37,8 +37,10 @@ export const createCustomer = asyncHandler(async (req, res) => {
       ClientEmail: email,
       ClientMobile: mobile,
       ClientProject: projectName,
-      completed: 'progress',
-      accepted: 'pending',
+      completed: "progress",
+      accepted: "pending",
+      timeDuration: "00:00",
+      notes: "",
     };
 
     await Attendant.findByIdAndUpdate(
@@ -71,7 +73,6 @@ export const createCustomer = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-
 
     if (!teamsUpdated.matchedCount) {
       return res.status(404).json({ message: "Team members not found." });
@@ -156,22 +157,21 @@ export const createCustomer = asyncHandler(async (req, res) => {
 
     // Retrieve all client names for the attendant
     const attendant = await Attendant.findById(availableAttendant._id);
-    const clientNames = attendant.ClientName.map(
-      (client) => client.ClientName
-    );
+    const clientNames = attendant.ClientName.map((client) => client.ClientName);
 
     // Update team member names with all client names
     const teamsUpdated = await Team.updateMany(
       { "teamMemberNames.employeeId": employeeIdFromAttendant },
       {
-        $addToSet: { "teamMemberNames.$[elem].ClientName": { $each: clientNames } },
+        $addToSet: {
+          "teamMemberNames.$[elem].ClientName": { $each: clientNames },
+        },
       },
       {
         arrayFilters: [{ "elem.employeeId": employeeIdFromAttendant }],
         new: true,
       }
     );
-    
 
     if (!teamsUpdated.matchedCount) {
       return res.status(404).json({ message: "Team members not found." });

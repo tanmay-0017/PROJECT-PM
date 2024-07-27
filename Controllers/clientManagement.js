@@ -1,8 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import Attendant from "../Models/Attendant.js";
 
-
-
 export const acceptClient = asyncHandler(async (req, res) => {
   const { employeeId } = req.params;
   const attendant = await Attendant.findOne({ employeeId });
