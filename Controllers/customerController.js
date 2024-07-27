@@ -33,7 +33,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
 
     const newClient = {
       ClientName: name,
-      ClientId: customerId,
+      ClientId: mobileFound.customerId,
       ClientEmail: email,
       ClientMobile: mobile,
       ClientProject: projectName,
@@ -107,7 +107,8 @@ export const createCustomer = asyncHandler(async (req, res) => {
     );
 
     return res.status(201).json(updatedCustomer);
-  } else {
+  } 
+  else {
     const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
 
     if (lastCustomer) {
