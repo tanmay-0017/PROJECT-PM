@@ -17,6 +17,13 @@ const createlog = new mongoose.Schema(
       enum: ["accepted", "rejected", "pending"],
       default: "pending",
     },
+    timeDuration: {
+      type: String,
+      default: "00:00",
+    },
+    notes: {
+      type: String,
+    },
   },
   {
     timestamps: true,
