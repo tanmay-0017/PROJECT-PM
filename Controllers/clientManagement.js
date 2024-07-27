@@ -85,6 +85,6 @@ export const getClientHistory = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Attendant not found" });
   }
 
-  const clientHistory = attendant.ClientName.map((client) => client.ClientName);
+  const clientHistory = attendant.ClientName;
   res.status(200).json(clientHistory);
 });
