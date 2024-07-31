@@ -3,6 +3,6 @@ import { TimeCalcul } from "../Controllers/TimesheetsController.js";
 
 const router = Router();
 
-router.put("/timeline/:customerId", TimeCalcul);
+router.post("/timeline", TimeCalcul);
 
 export default router;
