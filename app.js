@@ -19,6 +19,7 @@ import salesManagerRouter from "./router/salesManagerRouter.js";
 import teamRouter from "./router/teamRouter.js";
 import clientManagement from "./router/clientManagementRoutes.js";
 import adminRouter from "./router/adminRouter.js";
+import teamMemberRouter from "./router/teamMemberRouter.js";
 
 const app = express();
 app.use(
@@ -55,5 +56,6 @@ app.use("/api/salesManager", salesManagerRouter);
 app.use("/api/teams", teamRouter);
 app.use("/api/clientManagement", clientManagement);
 app.use("/api/admin", adminRouter)
+app.use("/api/teamMember", teamMemberRouter);
 
 export { app };
