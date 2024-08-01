@@ -275,24 +275,109 @@ export const createTeam = async (req, res) => {
   }
 };
 
-export const addonemember = async (req, res) => {
-  const { teamName, projectName, managerName, teamMemberName } = req.body;
+// export const addonemember = async (req, res) => {
+//   const { teamId, teamMemberName } = req.body;
 
-  if (!teamName || !projectName || !managerName || !teamMemberName) {
-    return res.status(400).json({ message: "Invalid input data" });
-  }
+//   console.log("teamMemberName", teamMemberName);
+//   console.log("teamId", teamId);
+
+//   if (!teamId || !teamMemberName) {
+//     return res.status(400).json({ message: "Invalid input data" });
+//   }
+
+//   const teamData = await Team.findById(teamId);
+
+//   // Update each attendant and collect the results
+//   const attendants = await Promise.all(
+//     teamMemberName.map(async (memberName) => {
+//       const updatedAttendant = await Attendant.findOneAndUpdate(
+//         { name: memberName },
+//         {
+//           $set: {
+//             project: teamData.projectName,
+//             team: teamData.teamName,
+//             managerName: teamData.managerName,
+//           },
+//         },
+//         { new: true }
+//       );
+//       if (!updatedAttendant) {
+//         console.log(`No attendant found for ${memberName}`);
+//       }
+//       return updatedAttendant;
+//     })
+//   );
+
+//   // Ensure there are valid attendants to push
+//   const validAttendants = attendants.filter((attendant) => attendant);
+//   if (validAttendants.length === 0) {
+//     console.log("No valid attendants to add to team.");
+//     return res
+//       .status(404)
+//       .json({ message: "No attendants found to add to the team" });
+//   }
+
+//   // Update the team with the new members
+//   const teamUpdate = await Team.findOneAndUpdate(
+//     { teamName: teamData.teamName },
+//     {
+//       $push: {
+//         teamMemberNames: {
+//           $each: validAttendants.map((attendant) => ({
+//             name: attendant.name,
+//             employeeId: attendant.employeeId,
+//             emailID: attendant.emailID,
+//             teamName: teamData.teamName,
+//             projectName: teamData.projectName,
+//             managerName: teamData.managerName,
+//             ClientName:
+//               attendant.ClientName.length > 0 ? attendant.ClientName : [], // Ensure ClientName is not an empty array
+//           })),
+//         },
+//       },
+//     },
+//     { new: true }
+//   );
+
+//   if (!teamUpdate) {
+//     console.log("No team found to update.");
+//     return res.status(404).json({ message: "Team not found" });
+//   }
+
+//   return res.status(200).json(teamUpdate);
+// };
+
+export const addonemember = async (req, res) => {
+  const { teamId, teamMemberName } = req.body;
 
   try {
-    // Update each attendant and collect the results
+    console.log("teamMemberName", teamMemberName);
+    console.log("teamId", teamId);
+
+    if (!teamId) {
+      return res.status(400).json({ message: "Invalid input data teamId" });
+    }
+    if (!teamMemberName) {
+      return res
+        .status(400)
+        .json({ message: "Invalid input data teamMemberName" });
+    }
+
+    const teamData = await Team.findById(teamId);
+    if (!teamData) {
+      console.log("Team not found.");
+      return res.status(404).json({ message: "Team not found" });
+    }
+
     const attendants = await Promise.all(
       teamMemberName.map(async (memberName) => {
         const updatedAttendant = await Attendant.findOneAndUpdate(
           { name: memberName },
           {
             $set: {
-              project: projectName,
-              team: teamName,
-              managerName,
+              project: teamData.projectName,
+              team: teamData.teamName,
+              managerName: teamData.managerName,
             },
           },
           { new: true }
@@ -304,18 +389,16 @@ export const addonemember = async (req, res) => {
       })
     );
 
-    // Ensure there are valid attendants to push
     const validAttendants = attendants.filter((attendant) => attendant);
     if (validAttendants.length === 0) {
-      console.log("No valid attendants to add to team.");
+      console.log("No valid attendants to add.");
       return res
         .status(404)
         .json({ message: "No attendants found to add to the team" });
     }
 
-    // Update the team with the new members
-    const teamUpdate = await Team.findOneAndUpdate(
-      { teamName },
+    const teamUpdate = await Team.findByIdAndUpdate(
+      teamId,
       {
         $push: {
           teamMemberNames: {
@@ -323,9 +406,9 @@ export const addonemember = async (req, res) => {
               name: attendant.name,
               employeeId: attendant.employeeId,
               emailID: attendant.emailID,
-              teamName,
-              projectName,
-              managerName,
+              teamName: teamData.teamName,
+              projectName: teamData.projectName,
+              managerName: teamData.managerName,
               ClientName:
                 attendant.ClientName.length > 0 ? attendant.ClientName : [], // Ensure ClientName is not an empty array
             })),
@@ -336,14 +419,13 @@ export const addonemember = async (req, res) => {
     );
 
     if (!teamUpdate) {
-      console.log("No team found to update.");
-      return res.status(404).json({ message: "Team not found" });
+      console.log("Failed to update team.");
+      return res.status(500).json({ message: "Failed to update team" });
     }
 
     return res.status(200).json(teamUpdate);
   } catch (error) {
-    console.error("Error adding team members:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    res.status(200).json({ message: `Failed to update team ${error}` });
   }
 };
 
