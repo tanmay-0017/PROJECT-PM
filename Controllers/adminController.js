@@ -71,7 +71,9 @@ const generateOTP = () => {
 const sendOTPEmail = async (email, otp) => {
   try {
     let config = {
-      service: 'gmail',
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false, // Use `true` for port 465, `false` for all other ports
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
