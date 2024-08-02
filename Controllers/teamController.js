@@ -548,7 +548,8 @@ export const updateSalesManagerTeam = async (req, res) => {
 
 export const updateSalesManagerTeam = async (req, res) => {
   const { id } = req.params;
-  const { managerName } = req.body;
+  let { managerName } = req.body;
+  managerName = Array.isArray(managerName) ? managerName[0] : managerName;
   try {
     // Find the team document by ID
     const team = await Team.findById(id);
