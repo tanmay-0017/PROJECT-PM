@@ -39,13 +39,15 @@ const parseTimeString = (timeString) => {
 */
 const parseTimeString = (timeString) => {
   if (typeof timeString !== "string") {
-    throw new TypeError("Expected a string");
+    throw new TypeError(`Expected a string but received ${typeof timeString}`);
   }
 
   // Assuming the format is "30 Jul | 05:57 PM"
   const parts = timeString.split(" | ");
   if (parts.length !== 2) {
-    throw new Error("Invalid timeString format");
+    throw new Error(
+      "Invalid timeString format. Expected format: '30 Jul | 05:57 PM'"
+    );
   }
 
   const [datePart, timePart] = parts;
@@ -54,7 +56,7 @@ const parseTimeString = (timeString) => {
   const isPM = timePart.includes("PM");
 
   if (!day || !month || !hour || !minute) {
-    throw new Error("Invalid timeString format");
+    throw new Error("Incomplete timeString components");
   }
 
   const monthMap = {
@@ -73,7 +75,7 @@ const parseTimeString = (timeString) => {
   };
 
   if (!(month in monthMap)) {
-    throw new Error("Invalid month");
+    throw new Error(`Invalid month: ${month}`);
   }
 
   let hour24 = parseInt(hour, 10);
@@ -92,11 +94,24 @@ const parseTimeString = (timeString) => {
 const TimeCalcul = asyncHandler(async (req, res) => {
   const { customerId } = req.params;
   const { StartTime, EndTime } = req.body;
+
+  if (!StartTime || !EndTime) {
+    return res
+      .status(400)
+      .json({ error: "StartTime and EndTime are required" });
+  }
+
   const customer = await Customer.findOne({ customerId: customerId });
+  if (!customer) {
+    return res.status(404).json({ error: "Customer not found" });
+  }
 
   const InTime = customer.createdAt;
   const attendantId = customer.attendant._id;
   const attendantData = await Attendant.findById(attendantId);
+  if (!attendantData) {
+    return res.status(404).json({ error: "Attendant not found" });
+  }
   const OutTime = attendantData.updatedAt;
 
   const calculateTimeDifference = (startTime, endTime) => {
@@ -109,20 +124,24 @@ const TimeCalcul = asyncHandler(async (req, res) => {
     return `${diffHrs}:${diffMins}`;
   };
 
-  const startDate = parseTimeString(StartTime);
-  const endDate = parseTimeString(EndTime);
+  try {
+    const startDate = parseTimeString(StartTime);
+    const endDate = parseTimeString(EndTime);
 
-  const timeDuration = calculateTimeDifference(startDate, endDate);
+    const timeDuration = calculateTimeDifference(startDate, endDate);
 
-  const customerUpdate = await Customer.findByIdAndUpdate(
-    customer._id,
-    {
-      timeDuration,
-    },
-    { new: true }
-  );
+    const customerUpdate = await Customer.findByIdAndUpdate(
+      customer._id,
+      {
+        timeDuration,
+      },
+      { new: true }
+    );
 
-  res.status(200).json(customerUpdate);
+    res.status(200).json(customerUpdate);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 export { TimeCalcul };
