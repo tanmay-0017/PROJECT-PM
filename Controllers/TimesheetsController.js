@@ -1,7 +1,7 @@
 import Attendant from "../Models/Attendant.js";
 import Customer from "../Models/customer.js";
 import asyncHandler from "../utils/asyncHandler.js";
-
+/*
 const parseTimeString = (timeString) => {
   // Assuming the format is "30 Jul | 05:57 PM"
   const [datePart, timePart] = timeString.split(" | ");
@@ -23,6 +23,58 @@ const parseTimeString = (timeString) => {
     Nov: 10,
     Dec: 11,
   };
+
+  let hour24 = parseInt(hour, 10);
+  if (isPM && hour24 !== 12) hour24 += 12;
+  if (!isPM && hour24 === 12) hour24 = 0;
+
+  return new Date(
+    new Date().getFullYear(),
+    monthMap[month],
+    parseInt(day, 10),
+    hour24,
+    parseInt(minute, 10)
+  );
+};
+*/
+const parseTimeString = (timeString) => {
+  if (typeof timeString !== "string") {
+    throw new TypeError("Expected a string");
+  }
+
+  // Assuming the format is "30 Jul | 05:57 PM"
+  const parts = timeString.split(" | ");
+  if (parts.length !== 2) {
+    throw new Error("Invalid timeString format");
+  }
+
+  const [datePart, timePart] = parts;
+  const [day, month] = datePart.split(" ");
+  const [hour, minute] = timePart.split(":");
+  const isPM = timePart.includes("PM");
+
+  if (!day || !month || !hour || !minute) {
+    throw new Error("Invalid timeString format");
+  }
+
+  const monthMap = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+
+  if (!(month in monthMap)) {
+    throw new Error("Invalid month");
+  }
 
   let hour24 = parseInt(hour, 10);
   if (isPM && hour24 !== 12) hour24 += 12;
