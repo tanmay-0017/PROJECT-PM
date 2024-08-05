@@ -32,6 +32,7 @@ export const rejectClient = asyncHandler(async (req, res) => {
     attendant._id,
     {
       "ClientName.$[].accepted": "rejected",
+      "ClientName.$[].completed": "notCompleted",
     },
     { new: true }
   );
