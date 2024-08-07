@@ -20,6 +20,10 @@ import teamRouter from "./router/teamRouter.js";
 import clientManagement from "./router/clientManagementRoutes.js";
 import adminRouter from "./router/adminRouter.js";
 import teamMemberRouter from "./router/teamMemberRouter.js";
+import recordRoute from './router/recordRoute.js';
+import editFormRoutes from './router/editFormRoutes.js';
+import salesRoutes from './router/salesRoutes.js';
+import detailsRouter from './router/detailsRouter.js';
 
 const app = express();
 app.use(
@@ -57,5 +61,9 @@ app.use("/api/teams", teamRouter);
 app.use("/api/clientManagement", clientManagement);
 app.use("/api/admin", adminRouter)
 app.use("/api/teamMember", teamMemberRouter);
+app.use('/api/record', recordRoute);
+app.use('/api/forms', editFormRoutes);
+app.use('/api', salesRoutes);
+app.use('/api/details', detailsRouter);
 
 export { app };
