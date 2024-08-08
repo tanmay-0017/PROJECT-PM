@@ -3,22 +3,6 @@ import { Admin } from "../Models/adminModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-import Attendant from "../Models/Attendant.js";
-import SalesManager from "../Models/salesManager.js";
-
-
-const getModelByRole = (role) => {
-  switch (role) {
-    case 'super admin':
-      return Admin;
-    case 'sales executive':
-      return Attendant;
-    case 'manager':
-      return SalesManager;
-    default:
-      return null;
-  }
-};
 
 
 export const createAdmin = async (req, res) => {
@@ -29,6 +13,7 @@ export const createAdmin = async (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Password is required" });
     }
 
+    // Check if Admin already exists
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin with this email already exists" });
@@ -46,49 +31,35 @@ export const createAdmin = async (req, res) => {
 };
 
 
-export const loginUser = async (req, res) => {
+export const loginAdmin = async (req, res) => {
   try {
     const { email, password, role } = req.body;
     if (!email || !password || !role) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Email, password, and role are required" });
     }
 
-    const Model = getModelByRole(role);
-    if (!Model) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid role" });
-    }
-
-    const user = await Model.findOne({ email });
-    if (!user) {
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid email" });
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    if (admin.role !== role) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid role" });
+    }
 
+    const isPasswordValid = bcrypt.compareSync(password, admin.password);
     if (!isPasswordValid) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ userEmail: user.email, role: user.role }, "secret1234");
-
-    const response = {
-      message: "Login successful",
-      token,
-      role: user.role
-    };
-
-    if (role === 'sales executive') {
-      response.employeeId = user.employeeId;
-    }
-
-
-    return res.status(StatusCodes.OK).json(response);
-
+    const token = jwt.sign({ adminEmail: admin.email, role: admin.role }, "secret1234");
+    return res.status(StatusCodes.OK).json({ message: "Login successful", token, role: admin.role });
   } catch (error) {
-    console.error("Error in loginUser:", error);
+    console.error("Error in loginAdmin:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An error occurred, please try again later." });
   }
 };
+
 
 
 // Generate OTP
@@ -119,7 +90,7 @@ const sendOTPEmail = async (email, otp) => {
     };
 
     await transporter.sendMail(mailOptions);
-
+    
 
   } catch (error) {
     console.error("Error in sendOTPEmail:", error);
@@ -130,38 +101,29 @@ const sendOTPEmail = async (email, otp) => {
 
 
 
-const findUserByEmail = async (email) => {
-  let user = await Admin.findOne({ email });
-  if (user) return { user, model: Admin };
-
-  user = await SalesManager.findOne({ email });
-  if (user) return { user, model: SalesManager };
-
-  user = await Attendant.findOne({ email });
-  if (user) return { user, model: Attendant };
-
-  return null;
-};
-
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+
     if (!email) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Email is required" });
     }
 
-    const userResult = await findUserByEmail(email);
-    if (!userResult) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "User with this email does not exist" });
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin with this email does not exist" });
     }
 
-    const { user, model } = userResult;
     const otp = generateOTP();
-    user.resetOTP = otp;
-    user.resetOTPExpiry = Date.now() + 3600000; // 1 hour expiry
-    await user.save();
+    admin.resetOTP = otp;
+    admin.resetOTPExpiry = Date.now() + 3600000; // 1 hour expiry
+    await admin.save();
 
+    console.log("otp", otp);
+    // Send OTP via email
     await sendOTPEmail(email, otp);
+
+
 
     res.status(StatusCodes.OK).json({ message: "OTP sent to email successfully" });
   } catch (error) {
@@ -170,24 +132,16 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-
-
-
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Email and OTP are required" });
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin not found" });
     }
 
-    const userResult = await findUserByEmail(email);
-    if (!userResult) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "User not found" });
-    }
-
-    const { user } = userResult;
-
-    if (user.resetOTP !== otp || user.resetOTPExpiry < Date.now()) {
+    if (admin.resetOTP !== otp || admin.resetOTPExpiry < Date.now()) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid or expired OTP" });
     }
 
@@ -198,34 +152,33 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-
-
 export const setNewPassword = async (req, res) => {
   try {
     const { email, newPassword, confirmPassword } = req.body;
 
-    if (!email || !newPassword || !confirmPassword) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Email, new password, and confirm password are required" });
+    if (!newPassword || !confirmPassword) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
     }
 
     if (newPassword !== confirmPassword) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: "Passwords do not match" });
     }
 
-    const userResult = await findUserByEmail(email);
-    if (!userResult) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "User not found" });
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Admin not found" });
     }
 
-    const { user } = userResult;
-
+    // Hash the new password before saving
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    user.password = hashedPassword;
-    user.resetOTP = null;
-    user.resetOTPExpiry = null;
+    // Update the admin's password and clear the OTP fields
+    admin.password = hashedPassword;
+    admin.resetOTP = null;
+    admin.resetOTPExpiry = null;
 
-    await user.save();
+    await admin.save();
 
     res.status(StatusCodes.OK).json({ message: "Password updated successfully" });
   } catch (error) {
@@ -233,45 +186,6 @@ export const setNewPassword = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An error occurred, please try again later." });
   }
 };
-
-
-
-export const changePassword = async (req, res) => {
-  try {
-    const { email, oldPassword, newPassword, confirmPassword } = req.body;
-
-    if (!email || !oldPassword || !newPassword || !confirmPassword) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
-    }
-
-    if (newPassword !== confirmPassword) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "New passwords do not match" });
-    }
-
-    const userResult = await findUserByEmail(email);
-
-    if (!userResult) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "User not found" });
-    }
-
-    const { user } = userResult;
-    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
-    if (!isOldPasswordValid) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Old password is incorrect" });
-    }
-
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await user.save();
-
-    res.status(StatusCodes.OK).json({ message: "Password changed successfully" });
-  } catch (error) {
-    console.error("Error in changePassword:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
-  }
-};
-
-
 
 
 

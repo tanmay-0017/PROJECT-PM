@@ -7,7 +7,7 @@ export const getAllTeamMembers = asyncHandler(async (req, res) => {
     name: a.name,
     status: a.status,
     team: a.team,
-    email: a.email,
+    emailID: a.emailID,
     clientsAttended: a.ClientName.length,
     phone: a.phone,
   }));
@@ -25,7 +25,7 @@ export const getAvailableTeamMembers = asyncHandler(async (req, res) => {
     name: a.name,
     status: a.status,
     team: a.team,
-    email: a.email,
+    emailID: a.emailID,
     clientsAttended: a.ClientName.length,
     phone: a.phone,
   }));
@@ -43,7 +43,7 @@ export const getAssignedTeamMembers = asyncHandler(async (req, res) => {
     name: a.name,
     status: a.status,
     team: a.team,
-    email: a.email,
+    emailID: a.emailID,
     clientsAttended: a.ClientName.length,
     phone: a.phone,
   }));
