@@ -162,7 +162,7 @@ export const createTeam = async (req, res) => {
         teamMemberNames: {
           name: attendants.name,
           employeeId: attendants.employeeId,
-          emailID: attendants.emailID,
+          email: attendants.email,
           teamName: teamName,
           projectName: projectName,
           managerName: managerName,
@@ -258,7 +258,7 @@ export const createTeam = async (req, res) => {
       teamMemberNames: attendants.map((attendant) => ({
         name: attendant.name,
         employeeId: attendant.employeeId,
-        emailID: attendant.emailID,
+        email: attendant.email,
         teamName,
         projectName,
         managerName,
@@ -326,7 +326,7 @@ export const createTeam = async (req, res) => {
 //           $each: validAttendants.map((attendant) => ({
 //             name: attendant.name,
 //             employeeId: attendant.employeeId,
-//             emailID: attendant.emailID,
+//             email: attendant.email,
 //             teamName: teamData.teamName,
 //             projectName: teamData.projectName,
 //             managerName: teamData.managerName,
@@ -405,7 +405,7 @@ export const addonemember = async (req, res) => {
             $each: validAttendants.map((attendant) => ({
               name: attendant.name,
               employeeId: attendant.employeeId,
-              emailID: attendant.emailID,
+              email: attendant.email,
               teamName: teamData.teamName,
               projectName: teamData.projectName,
               managerName: teamData.managerName,
