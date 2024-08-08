@@ -65,6 +65,19 @@ const attendantSchema = new mongoose.Schema(
     endTime: {
       type: Date,
     },
+    location:{
+      type: String,
+    },
+    country: {
+      type: String,
+      default: "INDIA"
+    },
+    postalCode: {
+      type: String,
+    },
+    aadharCard : {
+      type: String,
+    }
   },
   {
     timestamps: true,

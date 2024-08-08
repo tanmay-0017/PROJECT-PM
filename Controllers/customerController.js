@@ -107,8 +107,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
     );
 
     return res.status(201).json(updatedCustomer);
-  } 
-  else {
+  } else {
     const lastCustomer = await Customer.findOne().sort({ $natural: -1 });
 
     if (lastCustomer) {
@@ -306,3 +305,29 @@ export const deleteCustomer = asyncHandler(async (req, res) => {
   if (!customer) return res.status(404).json({ message: "Customer not found" });
   res.status(200).json({ message: "Customer deleted" });
 });
+
+export const ClientNotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log("Update", id);
+    const { notes } = req.body;
+    const client = await Customer.findOne({ customerId: id });
+    console.log("client", client);
+    const customer = await Customer.findByIdAndUpdate(
+      client._id,
+      { notes },
+      { new: true, runValidators: true }
+    );
+    if (!customer)
+      return res.status(404).json({ message: "Customer not found" });
+
+    await Attendant.findByIdAndUpdate(customer.attendant, {
+      status: "available",
+    });
+
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(400).json({ massage: error.message });
+  }
+};
