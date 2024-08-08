@@ -12,8 +12,8 @@ const adminSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['super admin', 'sales executive', 'manager'],
-        required: true
+        // enum: ['super admin', 'sales executive', 'manager'],
+        role: { type: String, default: "super admin" }
     },
 
     resetOTP: { 
