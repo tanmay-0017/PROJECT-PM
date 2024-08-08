@@ -1,16 +1,15 @@
 import express from "express";
-import { changePassword, createAdmin, deleteAdmin, deleteAllAdmins, forgotPassword, loginUser, setNewPassword, updateAdmin, verifyOtp } from "../Controllers/adminController.js";
+import { createAdmin, deleteAdmin, deleteAllAdmins, forgotPassword, loginAdmin, setNewPassword, updateAdmin, verifyOtp } from "../Controllers/adminController.js";
 import { verifyTokenAndRole } from "../Middlewares/loginMiddleware.js";
 
 
 const router = express.Router();
 
 router.post("/save", createAdmin);
-router.post("/login", loginUser);
+router.post("/login", loginAdmin);
 router.post("/forget-pass", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/set-password", setNewPassword);
-router.post("/change-password", changePassword);
 
 router.put('/update/:id', updateAdmin);
 router.delete('/delete/:id', deleteAdmin);
