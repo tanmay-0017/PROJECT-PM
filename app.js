@@ -24,6 +24,8 @@ import recordRoute from './router/recordRoute.js';
 import editFormRoutes from './router/editFormRoutes.js';
 import salesRoutes from './router/salesRoutes.js';
 import detailsRouter from './router/detailsRouter.js';
+import settingsExecutiveRouter from './router/settingsExecutive.js';
+import settingsManagerRouter from './router/settingsManager.js';
 
 const app = express();
 app.use(
@@ -65,5 +67,7 @@ app.use('/api/record', recordRoute);
 app.use('/api/forms', editFormRoutes);
 app.use('/api', salesRoutes);
 app.use('/api/details', detailsRouter);
+app.use('/api/settingsExecutive', settingsExecutiveRouter);
+app.use('/api/settingsManager', settingsManagerRouter);
 
 export { app };
