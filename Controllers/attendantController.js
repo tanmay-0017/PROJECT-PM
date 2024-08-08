@@ -2,7 +2,7 @@ import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, email, project, phone } = req.body;
+  const { name, status, team, emailID, project, phone } = req.body;
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -20,7 +20,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
       status,
       team,
       employeeId,
-      email,
+      emailID,
       project,
       phone,
     },
@@ -31,7 +31,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
     status,
     team,
     employeeId,
-    email,
+    emailID,
     project,
     phone,
   });
@@ -39,15 +39,13 @@ export const createAttendant = asyncHandler(async (req, res) => {
 */
 
 export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, email, project, phone } = req.body;
+  const { name, status, team, emailID, project, phone } = req.body;
 
-  if (!name || !email) {
+  if (!name || !emailID) {
     return res
       .status(400)
-      .json({ message: "Name and email are required fields." });
+      .json({ message: "Name and EmailID are required fields." });
   }
-
-  const defaultPassword = phone;
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -64,10 +62,9 @@ export const createAttendant = asyncHandler(async (req, res) => {
     status,
     team,
     employeeId,
-    email,
+    emailID,
     project,
     phone,
-    password: defaultPassword
   });
 
   try {
@@ -140,7 +137,7 @@ export const deleteAttendant = asyncHandler(async (req, res) => {
 });
 
 export const addTeamMember = asyncHandler(async (req, res) => {
-  const { employeeId, email, name, team, project } = req.body;
+  const { employeeId, emailID, name, team, project } = req.body;
   const teamMember = await Attendant.findOne({ employeeId: employeeId });
   console.log("teamMember", teamMember);
   const assignedTeamMember = await Attendant.findByIdAndUpdate(
