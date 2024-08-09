@@ -1,8 +1,10 @@
 import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import nodemailer from 'nodemailer';
+
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, emailID, project, phone } = req.body;
+  const { name, status, team, email, project, phone } = req.body;
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -20,7 +22,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
       status,
       team,
       employeeId,
-      emailID,
+      email,
       project,
       phone,
     },
@@ -31,21 +33,63 @@ export const createAttendant = asyncHandler(async (req, res) => {
     status,
     team,
     employeeId,
-    emailID,
+    email,
     project,
     phone,
   });
 });
 */
 
-export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, emailID, project, phone } = req.body;
+const generateRandomPassword = () => {
+  const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
+  return `Rof@${randomNumbers}`;
+};
 
-  if (!name || !emailID) {
+const sendEmail = async (email, password) => {
+
+  let config = {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false, // Use `true` for port 465, `false` for all other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+
+  }
+
+  const transporter = nodemailer.createTransport(config);
+
+  const mailOptions = {
+    from: 'process.env.EMAIL_USER',
+    to: email,
+    subject: 'Your Account Details',
+    text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+export const createAttendant = asyncHandler(async (req, res) => {
+  const { name, status, team, email, project, phone } = req.body;
+
+  if (!name || !email) {
     return res
       .status(400)
-      .json({ message: "Name and EmailID are required fields." });
+      .json({ message: "Name and email are required fields." });
   }
+
+
+  const existingAttendant = await Attendant.findOne({ email });
+  if (existingAttendant) {
+    return res
+      .status(400)
+      .json({ message: "An account with this email already exists." });
+  }
+
+  const defaultPassword = generateRandomPassword();
+
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -62,12 +106,15 @@ export const createAttendant = asyncHandler(async (req, res) => {
     status,
     team,
     employeeId,
-    emailID,
+    email,
     project,
     phone,
+    password: defaultPassword
+
   });
 
   try {
+    await sendEmail(email, defaultPassword);
     const savedAttendant = await newAttendant.save();
     res.status(201).json(savedAttendant);
   } catch (error) {
@@ -137,7 +184,7 @@ export const deleteAttendant = asyncHandler(async (req, res) => {
 });
 
 export const addTeamMember = asyncHandler(async (req, res) => {
-  const { employeeId, emailID, name, team, project } = req.body;
+  const { employeeId, email, name, team, project } = req.body;
   const teamMember = await Attendant.findOne({ employeeId: employeeId });
   console.log("teamMember", teamMember);
   const assignedTeamMember = await Attendant.findByIdAndUpdate(

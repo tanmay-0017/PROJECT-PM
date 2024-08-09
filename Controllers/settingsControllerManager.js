@@ -18,14 +18,14 @@ export const getSalesManagerInfo = async (req, res) => {
 
 export const updateSalesManager = async (req, res) => {
   const { employeeId } = req.params;
-  const { name, emailID, country, location, postalCode, aadharCard } = req.body;
+  const { name, email, country, location, postalCode, aadharCard } = req.body;
 
   try {
     const updatedSalesManager = await SalesManager.findOneAndUpdate(
       { employeeId },
       { 
         name, 
-        emailID, 
+        email, 
         country, 
         location, 
         postalCode, 

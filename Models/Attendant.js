@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
+
 
 const createlog = new mongoose.Schema(
   {
@@ -48,9 +50,20 @@ const attendantSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    emailID: {
+    email: {
       type: String,
       required: true,
+    },
+    password: {
+      type: String,
+    },
+    role: { type: String, default: "sales executive" },
+    resetOTP: {
+      type: String,
+    },
+    resetOTPExpiry: {
+      type: Date,
+
     },
     ClientName: [createlog],
     project: {
@@ -83,6 +96,23 @@ const attendantSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+attendantSchema.pre('save', async function (next) {
+  if (this.isModified('password') || this.isNew) {
+    try {
+      if (!this.password) {
+        this.password = this.phone; // Default password
+      }
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    next();
+  }
+});
 
 const Attendant = mongoose.model("Attendant", attendantSchema);
 
