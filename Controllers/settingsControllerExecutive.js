@@ -17,14 +17,14 @@ export const getInfo = async (req, res) => {
 
 export const updateAttendant = async (req, res) => {
   const { employeeId } = req.params;
-  const { name, emailID, country, location, postalCode, aadharCard } = req.body;
+  const { name, email, country, location, postalCode, aadharCard } = req.body;
 
   try {
     const updatedAttendant = await Attendant.findOneAndUpdate(
       { employeeId },
       { 
         name, 
-        emailID, 
+        email, 
         country, 
         location, 
         postalCode, 

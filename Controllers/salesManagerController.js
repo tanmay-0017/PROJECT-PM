@@ -1,10 +1,59 @@
 import SalesManager from "../Models/salesManager.js";
+import nodemailer from 'nodemailer';
+
+
+
+const generateRandomPassword = () => {
+  const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
+  return `Rof@${randomNumbers}`;
+};
+
+const sendEmail = async (email, password) => {
+
+  let config = {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false, // Use `true` for port 465, `false` for all other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+
+  }
+
+  const transporter = nodemailer.createTransport(config);
+
+  const mailOptions = {
+    from: 'process.env.EMAIL_USER',
+    to: email,
+    subject: 'Your Account Details',
+    text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
 
 // Create a new Sales Manager
 export const createSalesManager = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
-    const salesManager = new SalesManager({ name, email, phone });
+
+    const existingManager = await SalesManager.findOne({ email });
+    if (existingManager) {
+      return res
+        .status(400)
+        .json({ message: "An account with this email already exists." });
+    }
+
+    const defaultPassword = generateRandomPassword();
+
+    const salesManager = new SalesManager({
+      name,
+      email,
+      phone,
+      password: defaultPassword
+    });
+    await sendEmail(email, defaultPassword);
     await salesManager.save();
     res.status(201).json(salesManager);
   } catch (error) {
