@@ -575,3 +575,33 @@ export const updateSalesManagerTeam = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteTeamMember = async (req, res) => {
+  const { teamId, memberId } = req.params;
+
+  try {
+    if (!teamId || !memberId) {
+      return res.status(400).json({ message: "Invalid parameters" });
+    }
+
+    // Find the team document and remove the specific member from the teamMemberNames array
+    const result = await Team.findOneAndUpdate(
+      { _id: teamId },
+      {
+        $pull: { teamMemberNames: { _id: memberId } },
+        $unset: { managerName: "", projectName: "" },
+      },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Team or team member not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Team member deleted successfully", team: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
