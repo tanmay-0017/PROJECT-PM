@@ -16,7 +16,8 @@ export const getAdminInfo = async (req, res) => {
 
 export const updateAdmin = async (req, res) => {
   const { employeeId } = req.params;
-  const { name, email, country, location, postalCode, aadharCard } = req.body;
+  const { name, email, country, location, postalCode, aadharCard, phone } =
+    req.body;
 
   try {
     const updatedAdmin = await Admin.findOneAndUpdate(
@@ -28,6 +29,7 @@ export const updateAdmin = async (req, res) => {
         location,
         postalCode,
         aadharCard,
+        phone,
       },
       { new: true, runValidators: true }
     );

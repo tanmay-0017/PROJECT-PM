@@ -42,6 +42,9 @@ const adminSchema = new Schema(
     aadharCard: {
       type: String,
     },
+    phone: {
+      type: String,
+    },
     CoverImage: {
       type: String,
     },
