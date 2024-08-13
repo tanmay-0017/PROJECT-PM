@@ -6,7 +6,7 @@ export const getAdminInfo = async (req, res) => {
   try {
     const findInfo = await Admin.findOne({ employeeId });
     if (!findInfo) {
-      res.status(400).json({ message: "Admin not found" });
+      return res.status(400).json({ message: "Admin not found" });
     }
     return res.status(200).json(findInfo);
   } catch (error) {

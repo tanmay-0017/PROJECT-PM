@@ -44,7 +44,7 @@ export const createSalesManager = async (req, res) => {
     let employeeId;
 
     if (lastemployee && lastemployee.employeeId) {
-      const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(5));
+      const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(6));
       employeeId = `ROFEMO${(lastemployeeIdNum + 1).toString()}`;
     } else {
       employeeId = "ROFEMO1";
