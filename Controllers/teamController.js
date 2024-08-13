@@ -589,7 +589,6 @@ export const deleteTeamMember = async (req, res) => {
       { _id: teamId },
       {
         $pull: { teamMemberNames: { _id: memberId } },
-        $unset: { managerName: "", projectName: "" },
       },
       { new: true }
     );
