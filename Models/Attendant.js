@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from 'bcrypt';
-
+import bcrypt from "bcrypt";
 
 const createlog = new mongoose.Schema(
   {
@@ -63,7 +62,6 @@ const attendantSchema = new mongoose.Schema(
     },
     resetOTPExpiry: {
       type: Date,
-
     },
     ClientName: [createlog],
     project: {
@@ -78,27 +76,34 @@ const attendantSchema = new mongoose.Schema(
     endTime: {
       type: Date,
     },
-    location:{
+    location: {
       type: String,
     },
     country: {
       type: String,
-      default: "INDIA"
+      default: "INDIA",
     },
     postalCode: {
       type: String,
     },
-    aadharCard : {
+    aadharCard: {
       type: String,
-    }
+    },
+    CoverImage: {
+      type: String,
+    },
+    clientConversion: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-attendantSchema.pre('save', async function (next) {
-  if (this.isModified('password') || this.isNew) {
+attendantSchema.pre("save", async function (next) {
+  if (this.isModified("password") || this.isNew) {
     try {
       if (!this.password) {
         this.password = this.phone; // Default password

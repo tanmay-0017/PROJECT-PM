@@ -1,7 +1,5 @@
 import SalesManager from "../Models/salesManager.js";
-import nodemailer from 'nodemailer';
-
-
+import nodemailer from "nodemailer";
 
 const generateRandomPassword = () => {
   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
@@ -9,24 +7,22 @@ const generateRandomPassword = () => {
 };
 
 const sendEmail = async (email, password) => {
-
   let config = {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: false, // Use `true` for port 465, `false` for all other ports
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-
-  }
+      pass: process.env.EMAIL_PASS,
+    },
+  };
 
   const transporter = nodemailer.createTransport(config);
 
   const mailOptions = {
-    from: 'process.env.EMAIL_USER',
+    from: "process.env.EMAIL_USER",
     to: email,
-    subject: 'Your Account Details',
+    subject: "Your Account Details",
     text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
   };
 
@@ -44,14 +40,23 @@ export const createSalesManager = async (req, res) => {
         .status(400)
         .json({ message: "An account with this email already exists." });
     }
+    const lastemployee = await SalesManager.findOne().sort({ $natural: -1 });
+    let employeeId;
 
+    if (lastemployee && lastemployee.employeeId) {
+      const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(5));
+      employeeId = `ROFEMO${(lastemployeeIdNum + 1).toString()}`;
+    } else {
+      employeeId = "ROFEMO1";
+    }
     const defaultPassword = generateRandomPassword();
 
     const salesManager = new SalesManager({
       name,
       email,
       phone,
-      password: defaultPassword
+      employeeId,
+      password: defaultPassword,
     });
     await sendEmail(email, defaultPassword);
     await salesManager.save();
