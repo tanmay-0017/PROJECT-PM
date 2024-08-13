@@ -8,6 +8,7 @@ import {
   makeAttendantAvailable,
   makeAllAttendantsAvailable,
   addTeamMember,
+  clientConversion,
 } from "../Controllers/attendantController.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.put("/attendantAvailable/:id", makeAttendantAvailable);
 router.put("/allAttendantAvailable", makeAllAttendantsAvailable);
 router.delete("/delete/:id", deleteAttendant);
 router.put("/addTeamMember", addTeamMember);
+router.put("/clientConversion/:employeeId", clientConversion);
 
 export default router;

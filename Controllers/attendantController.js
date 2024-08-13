@@ -1,6 +1,6 @@
 import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
@@ -46,30 +46,27 @@ const generateRandomPassword = () => {
 };
 
 const sendEmail = async (email, password) => {
-
   let config = {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: false, // Use `true` for port 465, `false` for all other ports
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-
-  }
+      pass: process.env.EMAIL_PASS,
+    },
+  };
 
   const transporter = nodemailer.createTransport(config);
 
   const mailOptions = {
-    from: 'process.env.EMAIL_USER',
+    from: "process.env.EMAIL_USER",
     to: email,
-    subject: 'Your Account Details',
+    subject: "Your Account Details",
     text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
   };
 
   await transporter.sendMail(mailOptions);
 };
-
 
 export const createAttendant = asyncHandler(async (req, res) => {
   const { name, status, team, email, project, phone } = req.body;
@@ -80,7 +77,6 @@ export const createAttendant = asyncHandler(async (req, res) => {
       .json({ message: "Name and email are required fields." });
   }
 
-
   const existingAttendant = await Attendant.findOne({ email });
   if (existingAttendant) {
     return res
@@ -89,7 +85,6 @@ export const createAttendant = asyncHandler(async (req, res) => {
   }
 
   const defaultPassword = generateRandomPassword();
-
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -109,8 +104,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
     email,
     project,
     phone,
-    password: defaultPassword
-
+    password: defaultPassword,
   });
 
   try {
@@ -200,3 +194,25 @@ export const addTeamMember = asyncHandler(async (req, res) => {
 
   return res.status(200).json(assignedTeamMember);
 });
+
+export const clientConversion = async (req, res) => {
+  const { employeeId } = req.params;
+  try {
+    const teamMember = await Attendant.findOne({ employeeId: employeeId });
+    if (!teamMember) {
+      return res.status(404).json({ message: "Team member not found" });
+    }
+
+    const result = await Attendant.findByIdAndUpdate(
+      teamMember._id, // Use the ObjectId directly
+      { $inc: { clientConversion: 1 } },
+      { new: true } // Optionally return the updated document
+    );
+
+    console.log(result);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
