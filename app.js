@@ -20,12 +20,13 @@ import teamRouter from "./router/teamRouter.js";
 import clientManagement from "./router/clientManagementRoutes.js";
 import adminRouter from "./router/adminRouter.js";
 import teamMemberRouter from "./router/teamMemberRouter.js";
-import recordRoute from './router/recordRoute.js';
-import editFormRoutes from './router/editFormRoutes.js';
-import salesRoutes from './router/salesRoutes.js';
-import detailsRouter from './router/detailsRouter.js';
-import settingsExecutiveRouter from './router/settingsExecutive.js';
-import settingsManagerRouter from './router/settingsManager.js';
+import recordRoute from "./router/recordRoute.js";
+import editFormRoutes from "./router/editFormRoutes.js";
+import salesRoutes from "./router/salesRoutes.js";
+import detailsRouter from "./router/detailsRouter.js";
+import settingsExecutiveRouter from "./router/settingsExecutive.js";
+import settingsManagerRouter from "./router/settingsManager.js";
+import settingsAdminRouter from "./router/settingsAdmin.js";
 
 const app = express();
 app.use(
@@ -35,8 +36,11 @@ app.use(
   })
 );
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
 });
 app.use(bodyParser.json());
@@ -61,13 +65,14 @@ app.use("/api/chequeImage", chequeImage);
 app.use("/api/salesManager", salesManagerRouter);
 app.use("/api/teams", teamRouter);
 app.use("/api/clientManagement", clientManagement);
-app.use("/api/admin", adminRouter)
+app.use("/api/admin", adminRouter);
 app.use("/api/teamMember", teamMemberRouter);
-app.use('/api/record', recordRoute);
-app.use('/api/forms', editFormRoutes);
-app.use('/api', salesRoutes);
-app.use('/api/details', detailsRouter);
-app.use('/api/settingsExecutive', settingsExecutiveRouter);
-app.use('/api/settingsManager', settingsManagerRouter);
+app.use("/api/record", recordRoute);
+app.use("/api/forms", editFormRoutes);
+app.use("/api", salesRoutes);
+app.use("/api/details", detailsRouter);
+app.use("/api/settingsExecutive", settingsExecutiveRouter);
+app.use("/api/settingsManager", settingsManagerRouter);
+app.use("/api/settingsAdmin", settingsAdminRouter);
 
 export { app };

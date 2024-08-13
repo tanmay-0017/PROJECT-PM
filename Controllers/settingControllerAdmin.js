@@ -1,24 +1,25 @@
-import Attendant from "../Models/Attendant.js";
+import { Admin } from "../Models/adminModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-export const getInfo = async (req, res) => {
+
+export const getAdminInfo = async (req, res) => {
   const { employeeId } = req.params;
   try {
-    const employee = await Attendant.findOne({ employeeId });
-    if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+    const findInfo = await Admin.findOne({ employeeId });
+    if (!findInfo) {
+      return res.status(400).json({ message: "Admin not found" });
     }
-    res.status(200).json(employee);
+    return res.status(200).json(findInfo);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-export const updateAttendant = async (req, res) => {
+export const updateAdmin = async (req, res) => {
   const { employeeId } = req.params;
   const { name, email, country, location, postalCode, aadharCard } = req.body;
 
   try {
-    const updatedAttendant = await Attendant.findOneAndUpdate(
+    const updatedAdmin = await Admin.findOneAndUpdate(
       { employeeId },
       {
         name,
@@ -30,33 +31,33 @@ export const updateAttendant = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-    console.log("updatedAttendant", updatedAttendant);
-    if (!updatedAttendant) {
-      return res.status(404).json({ message: "Employee not found" });
+    console.log("updatedAdmin", updatedAdmin);
+    if (!updatedAdmin) {
+      return res.status(404).json({ message: "admin not found" });
     }
-    res.status(200).json(updatedAttendant);
+    res.status(200).json(updatedAdmin);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export const deleteAttendant = async (req, res) => {
+export const deleteAdmin = async (req, res) => {
   const { employeeId } = req.params;
   try {
-    const deletedAttendant = await Attendant.findOneAndDelete({ employeeId });
-    if (!deletedAttendant) {
-      return res.status(404).json({ message: "Employee not found" });
+    const deletedAdmin = await Admin.findOneAndDelete({ employeeId });
+    if (!deletedAdmin) {
+      return res.status(404).json({ message: "Admin not found" });
     }
-    res.status(200).json({ message: "Employee deleted successfully" });
+    res.status(200).json({ message: "Admin deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export const updateCoverImage = async (req, res) => {
+export const AdminupdateCoverImage = async (req, res) => {
   const { employeeId } = req.params;
 
-  const FindData = await Attendant.findOne({ employeeId });
+  const FindData = await Admin.findOne({ employeeId });
   if (!req.files || !req.files?.CoverImage || !req.files?.CoverImage[0]) {
     return res.status(400).json({ message: "Cheque Image file is required" });
   }
@@ -66,7 +67,7 @@ export const updateCoverImage = async (req, res) => {
   // Upload the image to Cloudinary
   const chequeImageUpload = await uploadOnCloudinary(chequeImageLocalPath);
   console.log(chequeImageUpload);
-  const AttendantUploadImage = await Attendant.findByIdAndUpdate(
+  const AdminUploadImage = await Admin.findByIdAndUpdate(
     FindData._id,
     {
       CoverImage: chequeImageUpload.url,
@@ -74,5 +75,5 @@ export const updateCoverImage = async (req, res) => {
     { new: true }
   );
 
-  return res.status(200).json(AttendantUploadImage);
+  return res.status(200).json(AdminUploadImage);
 };
