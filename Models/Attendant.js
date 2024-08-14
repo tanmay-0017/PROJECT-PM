@@ -55,6 +55,7 @@ const attendantSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
     },
     role: { type: String, default: "sales executive" },
     resetOTP: {
@@ -102,22 +103,22 @@ const attendantSchema = new mongoose.Schema(
   }
 );
 
-attendantSchema.pre("save", async function (next) {
-  if (this.isModified("password") || this.isNew) {
-    try {
-      if (!this.password) {
-        this.password = this.phone; // Default password
-      }
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next();
-  }
-});
+// attendantSchema.pre("save", async function (next) {
+//   if (this.isModified("password") || this.isNew) {
+//     try {
+//       if (!this.password) {
+//         this.password = this.phone; // Default password
+//       }
+//       const salt = await bcrypt.genSalt(10);
+//       this.password = await bcrypt.hash(this.password, salt);
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   } else {
+//     next();
+//   }
+// });
 
 const Attendant = mongoose.model("Attendant", attendantSchema);
 

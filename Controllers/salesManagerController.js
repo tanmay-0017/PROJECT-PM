@@ -1,5 +1,7 @@
 import SalesManager from "../Models/salesManager.js";
 import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+
 
 const generateRandomPassword = () => {
   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
@@ -51,13 +53,17 @@ export const createSalesManager = async (req, res) => {
     }
     const defaultPassword = generateRandomPassword();
 
+    const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
+
     const salesManager = new SalesManager({
       name,
       email,
       phone,
       employeeId,
-      password: defaultPassword,
+      password: hashedPassword,
     });
+    // console.log("default Password", defaultPassword);
     await sendEmail(email, defaultPassword);
     await salesManager.save();
     res.status(201).json(salesManager);
