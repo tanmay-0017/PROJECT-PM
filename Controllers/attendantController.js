@@ -1,6 +1,7 @@
 import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
 
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
@@ -96,6 +97,8 @@ export const createAttendant = asyncHandler(async (req, res) => {
     employeeId = "ROFEX1";
   }
 
+  const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
   const newAttendant = new Attendant({
     name,
     status,
@@ -104,10 +107,11 @@ export const createAttendant = asyncHandler(async (req, res) => {
     email,
     project,
     phone,
-    password: defaultPassword,
+    password: hashedPassword,
   });
 
   try {
+    // console.log("default Password",defaultPassword);
     await sendEmail(email, defaultPassword);
     const savedAttendant = await newAttendant.save();
     res.status(201).json(savedAttendant);
