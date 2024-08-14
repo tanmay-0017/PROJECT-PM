@@ -27,6 +27,7 @@ import detailsRouter from "./router/detailsRouter.js";
 import settingsExecutiveRouter from "./router/settingsExecutive.js";
 import settingsManagerRouter from "./router/settingsManager.js";
 import settingsAdminRouter from "./router/settingsAdmin.js";
+import overviewRouter from "./router/overviewRouter.js";
 
 const app = express();
 app.use(
@@ -74,5 +75,6 @@ app.use("/api/details", detailsRouter);
 app.use("/api/settingsExecutive", settingsExecutiveRouter);
 app.use("/api/settingsManager", settingsManagerRouter);
 app.use("/api/settingsAdmin", settingsAdminRouter);
+app.use("/api/overview", overviewRouter);
 
 export { app };
