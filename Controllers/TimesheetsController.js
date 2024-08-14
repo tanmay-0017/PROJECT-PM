@@ -121,7 +121,10 @@ const TimeCalcul = asyncHandler(async (req, res) => {
     const diffHrs = Math.floor(diffMs / 3600000);
     const diffMins = Math.floor((diffMs % 3600000) / 60000);
 
-    return `${diffHrs}:${diffMins}`;
+    // return `${diffHrs}:${diffMins}`;
+    const paddedHrs = String(diffHrs).padStart(2, "0");
+    const paddedMins = String(diffMins).padStart(2, "0");
+    return `${paddedHrs}:${paddedMins}`;
   };
 
   try {
