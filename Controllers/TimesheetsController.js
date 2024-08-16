@@ -1,4 +1,5 @@
 import Attendant from "../Models/Attendant.js";
+import Partner from "../Models/ChannelPartner.js";
 import Customer from "../Models/customer.js";
 import asyncHandler from "../utils/asyncHandler.js";
 /*
@@ -101,7 +102,11 @@ const TimeCalcul = asyncHandler(async (req, res) => {
       .json({ error: "StartTime and EndTime are required" });
   }
 
-  const customer = await Customer.findOne({ customerId: customerId });
+  const customer =
+    (await Customer.findOne({ customerId: customerId })) ||
+    (await Partner.findOne({ partnerId: customerId }));
+
+  console.log("customer", customer);
   if (!customer) {
     return res.status(404).json({ error: "Customer not found" });
   }
@@ -132,14 +137,22 @@ const TimeCalcul = asyncHandler(async (req, res) => {
     const endDate = parseTimeString(EndTime);
 
     const timeDuration = calculateTimeDifference(startDate, endDate);
-
-    const customerUpdate = await Customer.findByIdAndUpdate(
-      customer._id,
-      {
-        timeDuration,
-      },
-      { new: true }
-    );
+    console.log("Time difference", typeof timeDuration);
+    const customerUpdate =
+      (await Customer.findByIdAndUpdate(
+        customer._id,
+        {
+          timeDuration,
+        },
+        { new: true }
+      )) ||
+      (await Partner.findByIdAndUpdate(
+        customer._id,
+        {
+          timeDuration,
+        },
+        { new: true }
+      ));
 
     res.status(200).json(customerUpdate);
   } catch (error) {
