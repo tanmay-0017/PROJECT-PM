@@ -220,3 +220,19 @@ export const clientConversion = async (req, res) => {
     return res.status(500).json({ message: "An error occurred" });
   }
 };
+
+export const onlineEmploy = async (req, res) => {
+  const { employeeId } = req.params;
+  const { StaffStatus } = req.body;
+  const teamMember = await Attendant.findOne({ employeeId: employeeId });
+  if (!teamMember) {
+    return res.status(404).json({ message: "Team member not found" });
+  }
+  const result = await Attendant.findByIdAndUpdate(
+    teamMember._id,
+    { StaffStatus },
+    { new: true } // Optionally return the updated document
+  );
+  console.log(result);
+  return res.status(200).json(result);
+};

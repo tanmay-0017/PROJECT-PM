@@ -97,6 +97,11 @@ const attendantSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    StaffStatus: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
   },
   {
     timestamps: true,
