@@ -1,20 +1,27 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import Attendant from "../Models/Attendant.js";
 import Customer from "../Models/customer.js";
-import ChannelPartner from "../Models/ChannelPartner.js"
+import ChannelPartner from "../Models/ChannelPartner.js";
 
 const calculateStartDate = (interval) => {
   const now = new Date();
   let startDate;
 
   switch (interval) {
-    case 'daily':
+    case "daily":
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       break;
-    case 'monthly':
+    case "weekly":
+      startDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - now.getDay()
+      );
+      break;
+    case "monthly":
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       break;
-    case 'yearly':
+    case "yearly":
       startDate = new Date(now.getFullYear(), 0, 1);
       break;
     default:
@@ -23,7 +30,6 @@ const calculateStartDate = (interval) => {
 
   return startDate;
 };
-
 
 export const getNumberOfDirectVisitors = asyncHandler(async (req, res) => {
   const { interval } = req.query;
@@ -42,7 +48,6 @@ export const getNumberOfDirectVisitors = asyncHandler(async (req, res) => {
   res.status(200).json({ numberOfDirectVisitors });
 });
 
-
 export const getNumberOfChannelVisitors = asyncHandler(async (req, res) => {
   const { interval } = req.query;
   const startDate = calculateStartDate(interval);
@@ -60,7 +65,6 @@ export const getNumberOfChannelVisitors = asyncHandler(async (req, res) => {
   res.status(200).json({ numberOfChannelVisitors });
 });
 
-
 export const getTotalMeetings = asyncHandler(async (req, res) => {
   const { interval } = req.query;
   const startDate = calculateStartDate(interval);
@@ -74,4 +78,42 @@ export const getTotalMeetings = asyncHandler(async (req, res) => {
   }, 0);
 
   res.status(200).json({ totalMeetings });
+});
+
+export const DealsClosed = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  try {
+    const startDate = calculateStartDate(interval);
+
+    const allAttendants = await Attendant.find({
+      createdAt: { $gte: startDate },
+    });
+
+    const totalClientConversion = allAttendants.reduce((total, attendant) => {
+      return total + attendant.clientConversion;
+    }, 0);
+
+    console.log(totalClientConversion);
+    res.status(200).json({ totalClientConversion });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+export const onlineEmployStatus = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  try {
+    const startDate = calculateStartDate(interval);
+    const allAttendants = await Attendant.find({
+      updatedAt: { $gte: startDate },
+    });
+
+    const totalStatus = allAttendants.reduce((total, attendant) => {
+      return total + (attendant.StaffStatus === "online" ? 1 : 0);
+    }, 0);
+
+    res.status(200).json({ totalStatus });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 });
