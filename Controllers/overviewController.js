@@ -4,6 +4,7 @@ import Customer from "../Models/customer.js";
 import ChannelPartner from "../Models/ChannelPartner.js";
 import { BarDiagram } from "../Models/BarDiagram.js";
 import SalesNote from "../Models/SalesNote.js";
+import Partner from "../Models/ChannelPartner.js";
 const calculateStartDate = (interval) => {
   const now = new Date();
   let startDate;
@@ -112,7 +113,7 @@ export const onlineEmployStatus = asyncHandler(async (req, res) => {
     const totalStatus = allAttendants.reduce((total, attendant) => {
       return total + (attendant.StaffStatus === "online" ? 1 : 0);
     }, 0);
-
+    console.log(allAttendants);
     res.status(200).json({ totalStatus });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -305,7 +306,7 @@ export const Bar = asyncHandler(async (req, res) => {
 //     data: hourlyCounts,
 //   });
 // });
-
+/* !!! 
 export const Bar = asyncHandler(async (req, res) => {
   const { interval } = req.query;
   const startDate = calculateStartDate(interval);
@@ -314,9 +315,9 @@ export const Bar = asyncHandler(async (req, res) => {
   const startOfDay = new Date();
   startOfDay.setHours(8, 0, 0, 0);
 
-  // Set the end of the day at 6:00 PM
+  // Set the end of the day at 8:00 PM
   const endOfDay = new Date();
-  endOfDay.setHours(21, 0, 0, 0);
+  endOfDay.setHours(20, 0, 0, 0);
 
   const allCustomer = await Customer.find({
     updatedAt: { $gte: startDate },
@@ -330,10 +331,13 @@ export const Bar = asyncHandler(async (req, res) => {
     // Iterate over each log entry within the customer
     customer.log.forEach((logEntry) => {
       const logUpdatedAt = new Date(logEntry.updatedAt);
+      console.log("Log entry updatedAt:", logUpdatedAt);
 
       // Check if the log entry update time is within the 8:00 AM to 8:00 PM range
       if (logUpdatedAt >= startOfDay && logUpdatedAt <= endOfDay) {
         const hourIndex = logUpdatedAt.getHours() - 8; // Adjust index for 8:00 AM as 0
+        console.log("Hour index:", hourIndex);
+
         if (hourIndex >= 0 && hourIndex < 13) {
           hourlyCounts[hourIndex]++;
         }
@@ -366,6 +370,182 @@ export const Bar = asyncHandler(async (req, res) => {
   });
 });
 
+
+*/
+/*
+export const Bar = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  const startDate = calculateStartDate(interval);
+
+  // Get the current date and set the start of the day at 8:00 AM
+  const startOfDay = new Date();
+  startOfDay.setHours(8, 0, 0, 0);
+
+  // Set the end of the day at 8:00 PM
+  const endOfDay = new Date();
+  endOfDay.setHours(20, 0, 0, 0);
+
+  const allCustomer = await Customer.find({
+    updatedAt: { $gte: startDate },
+  });
+  const allPartner = await Partner.find({
+    updatedAt: { $gte: startDate },
+  });
+
+  // Create an array to store the count of updates per hour
+  const hourlyCounts = new Array(13).fill(0); // For 13 hours from 8:00 AM to 8:00 PM
+
+  // Process customer data
+  allCustomer.forEach((customer) => {
+    customer.log.forEach((logEntry) => {
+      if (!logEntry.updatedAt) {
+        console.warn("Missing updatedAt in log entry");
+        return;
+      }
+      const logUpdatedAt = new Date(logEntry.updatedAt);
+      console.log("Customer log entry updatedAt:", logUpdatedAt);
+
+      if (logUpdatedAt >= startOfDay && logUpdatedAt <= endOfDay) {
+        const hourIndex = logUpdatedAt.getHours() - 8;
+        console.log("Hour index (Customer):", hourIndex);
+
+        if (hourIndex >= 0 && hourIndex < 13) {
+          hourlyCounts[hourIndex]++;
+        }
+      }
+    });
+  });
+
+  // Process partner data
+  allPartner.forEach((partner) => {
+    if (Array.isArray(partner)) {
+      partner.forEach((logEntry) => {
+        if (!logEntry.updatedAt) {
+          console.warn("Missing updatedAt in log entry");
+          return;
+        }
+        const logUpdatedAt = new Date(logEntry.updatedAt);
+        console.log("Partner log entry updatedAt:", logUpdatedAt);
+
+        if (logUpdatedAt >= startOfDay && logUpdatedAt <= endOfDay) {
+          const hourIndex = logUpdatedAt.getHours() - 8;
+          console.log("Hour index (Partner):", hourIndex);
+
+          if (hourIndex >= 0 && hourIndex < 13) {
+            hourlyCounts[hourIndex]++;
+          }
+        }
+      });
+    } else {
+      console.warn("Expected partner to be an array, but got:", partner);
+    }
+  });
+
+  console.log("Hourly counts:", hourlyCounts);
+
+  const currentDay = new Date();
+  currentDay.setHours(0, 0, 0, 0);
+
+  const existingEntry = await BarDiagram.findOne({ date: currentDay });
+
+  if (existingEntry) {
+    existingEntry.counts = hourlyCounts;
+    await existingEntry.save();
+  } else {
+    const newHourlyCount = new BarDiagram({
+      date: currentDay,
+      counts: hourlyCounts,
+    });
+    await newHourlyCount.save();
+  }
+
+  res.json({
+    data: hourlyCounts,
+  });
+});
+*/
+
+export const Bar = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  const startDate = calculateStartDate(interval);
+
+  // Get the current date and set the start of the day at 8:00 AM
+  const startOfDay = new Date();
+  startOfDay.setHours(8, 0, 0, 0);
+
+  // Set the end of the day at 8:00 PM
+  const endOfDay = new Date();
+  endOfDay.setHours(20, 0, 0, 0);
+
+  // Fetch data
+  const allCustomer = await Customer.find({ updatedAt: { $gte: startDate } });
+  const allPartner = await Partner.find({ updatedAt: { $gte: startDate } });
+
+  // Create an array to store the count of updates per hour
+  const hourlyCounts = new Array(13).fill(0); // For 13 hours from 8:00 AM to 8:00 PM
+
+  // Process customer data
+  allCustomer.forEach((customer) => {
+    customer.log.forEach((logEntry) => {
+      if (!logEntry.updatedAt) {
+        console.warn("Missing updatedAt in log entry");
+        return;
+      }
+      const logUpdatedAt = new Date(logEntry.updatedAt);
+      console.log("Customer log entry updatedAt:", logUpdatedAt);
+
+      if (logUpdatedAt >= startOfDay && logUpdatedAt <= endOfDay) {
+        const hourIndex = logUpdatedAt.getHours() - 8;
+        console.log("Hour index (Customer):", hourIndex);
+
+        if (hourIndex >= 0 && hourIndex < 13) {
+          hourlyCounts[hourIndex]++;
+        }
+      }
+    });
+  });
+
+  // Process partner data
+  allPartner.forEach((partner) => {
+    if (!partner.updatedAt) {
+      console.warn("Missing updatedAt in partner entry");
+      return;
+    }
+    const logUpdatedAt = new Date(partner.updatedAt);
+    console.log("Partner entry updatedAt:", logUpdatedAt);
+
+    if (logUpdatedAt >= startOfDay && logUpdatedAt <= endOfDay) {
+      const hourIndex = logUpdatedAt.getHours() - 8;
+      console.log("Hour index (Partner):", hourIndex);
+
+      if (hourIndex >= 0 && hourIndex < 13) {
+        hourlyCounts[hourIndex]++;
+      }
+    }
+  });
+
+  console.log("Hourly counts:", hourlyCounts);
+
+  const currentDay = new Date();
+  currentDay.setHours(0, 0, 0, 0);
+
+  const existingEntry = await BarDiagram.findOne({ date: currentDay });
+
+  if (existingEntry) {
+    existingEntry.counts = hourlyCounts;
+    await existingEntry.save();
+  } else {
+    const newHourlyCount = new BarDiagram({
+      date: currentDay,
+      counts: hourlyCounts,
+    });
+    await newHourlyCount.save();
+  }
+
+  res.json({
+    data: hourlyCounts,
+  });
+});
 // notes about
 
 export const getNotes = async (req, res) => {
