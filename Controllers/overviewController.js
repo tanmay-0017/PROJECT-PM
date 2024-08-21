@@ -140,7 +140,8 @@ export const Top_Executive = asyncHandler(async (req, res) => {
   return res.status(200).json(attendantsWithMeetings);
 });
 */
-// Top Executive
+/*
+! Top Executive
 export const Top_Executive = asyncHandler(async (req, res) => {
   const { interval } = req.query;
   try {
@@ -155,6 +156,45 @@ export const Top_Executive = asyncHandler(async (req, res) => {
     );
 
     const attendantsWithFilteredMeetings = TopAttendants.map((attendant) => {
+      const filteredMeetings = attendant.ClientName.filter((client) => {
+        const meetingDate = new Date(client.updatedAt);
+        return meetingDate >= startDate;
+      });
+
+      const totalMeetings = filteredMeetings.length;
+
+      return {
+        ...attendant.toObject(), //* Convert Mongoose document to plain object
+        totalMeetings, //* Add total filtered meetings count to each attendant
+      };
+    });
+
+    console.log(attendantsWithFilteredMeetings);
+    return res.status(200).json(attendantsWithFilteredMeetings);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+*/
+// Top Executive TOP 3
+export const Top_Executive = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  try {
+    const startDate = calculateStartDate(interval);
+
+    const allAttendants = await Attendant.find({
+      updatedAt: { $gte: startDate },
+    });
+
+    // Sort attendants by client conversion in descending order
+    const TopAttendants = allAttendants.sort(
+      (a, b) => b.clientConversion - a.clientConversion
+    );
+
+    // Take the top 3 attendants
+    const top3Attendants = TopAttendants.slice(0, 3);
+
+    const attendantsWithFilteredMeetings = top3Attendants.map((attendant) => {
       const filteredMeetings = attendant.ClientName.filter((client) => {
         const meetingDate = new Date(client.updatedAt);
         return meetingDate >= startDate;
@@ -465,6 +505,8 @@ export const Bar = asyncHandler(async (req, res) => {
 });
 */
 
+//20-08-2024
+/* 
 export const Bar = asyncHandler(async (req, res) => {
   const { interval } = req.query;
   const startDate = calculateStartDate(interval);
@@ -546,6 +588,79 @@ export const Bar = asyncHandler(async (req, res) => {
     data: hourlyCounts,
   });
 });
+*/
+
+export const Bar = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+  const startDate = calculateStartDate(interval);
+
+  // Fetch data based on the interval start date
+  const allCustomer = await Customer.find({ updatedAt: { $gte: startDate } });
+  const allPartner = await Partner.find({ updatedAt: { $gte: startDate } });
+
+  // Initialize an array to store the count of updates per interval
+  const intervalCounts = new Array(13).fill(0); // Modify as needed for different intervals
+
+  // Process customer data
+  allCustomer.forEach((customer) => {
+    customer.log.forEach((logEntry) => {
+      if (!logEntry.updatedAt) {
+        console.warn("Missing updatedAt in log entry");
+        return;
+      }
+      const logUpdatedAt = new Date(logEntry.updatedAt);
+
+      if (logUpdatedAt >= startDate) {
+        const hourIndex = logUpdatedAt.getHours() - 8;
+
+        if (hourIndex >= 0 && hourIndex < 13) {
+          intervalCounts[hourIndex]++;
+        }
+      }
+    });
+  });
+
+  // Process partner data
+  allPartner.forEach((partner) => {
+    if (!partner.updatedAt) {
+      console.warn("Missing updatedAt in partner entry");
+      return;
+    }
+    const logUpdatedAt = new Date(partner.updatedAt);
+
+    if (logUpdatedAt >= startDate) {
+      const hourIndex = logUpdatedAt.getHours() - 8;
+
+      if (hourIndex >= 0 && hourIndex < 13) {
+        intervalCounts[hourIndex]++;
+      }
+    }
+  });
+
+  console.log("Interval counts:", intervalCounts);
+
+  // Save the aggregated data based on the interval
+  const currentInterval = new Date();
+  currentInterval.setHours(0, 0, 0, 0);
+
+  const existingEntry = await BarDiagram.findOne({ date: currentInterval });
+
+  if (existingEntry) {
+    existingEntry.counts = intervalCounts;
+    await existingEntry.save();
+  } else {
+    const newIntervalCount = new BarDiagram({
+      date: currentInterval,
+      counts: intervalCounts,
+    });
+    await newIntervalCount.save();
+  }
+
+  res.json({
+    data: intervalCounts,
+  });
+});
+
 // notes about
 
 export const getNotes = async (req, res) => {
