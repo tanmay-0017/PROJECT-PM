@@ -54,6 +54,8 @@ export const createPartner = async (req, res) => {
           ClientName: {
             ClientName: customerName,
             ClientId: partnerId,
+            ClientProject: projectName,
+            ClientMobile: customerMobileLastFour,
           },
         },
       },
