@@ -5,6 +5,7 @@ import ChannelPartner from "../Models/ChannelPartner.js";
 import { BarDiagram } from "../Models/BarDiagram.js";
 import SalesNote from "../Models/SalesNote.js";
 import Partner from "../Models/ChannelPartner.js";
+import Team from "../Models/teamModel.js";
 const calculateStartDate = (interval) => {
   const now = new Date();
   let startDate;
@@ -669,5 +670,72 @@ export const getNotes = async (req, res) => {
     res.status(200).json(notes);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+export const clientConversion = async (req, res) => {
+  const { employeeId } = req.params;
+  const { interval } = req.query; // Get the interval from the query parameters
+
+  try {
+    const teamMember = await Attendant.findOne({ employeeId });
+    
+    if (!teamMember) {
+      return res.status(404).json({ message: "Team member not found" });
+    }
+
+    const team = await Team.findOne({ teamName: teamMember.team });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    // Calculate start date based on the provided interval
+    const startDate = calculateStartDate(interval);
+
+    // Increment client conversion for both team member and team if within the interval
+    const updatedMember = await Attendant.findByIdAndUpdate(
+      teamMember._id,
+      { $inc: { clientConversion: 1 } },
+      { new: true }
+    );
+
+    const updatedTeam = await Team.findByIdAndUpdate(
+      team._id,
+      { $inc: { clientConversion: 1 } },
+      { new: true }
+    );
+
+    // Fetch the client conversions based on the calculated interval start date
+    const memberConversions = await Attendant.find({
+      employeeId: employeeId,
+      updatedAt: { $gte: startDate }
+    });
+
+    const teamConversions = await Team.find({
+      teamName: teamMember.team,
+      updatedAt: { $gte: startDate }
+    });
+
+    // Prepare the response data with the required fields
+    const responseData = {
+      clientConversion: updatedMember.clientConversion,
+      teamName: team.teamName,
+      meetingsAttended: updatedMember.meetingsAttended, // Retrieve the meetings attended
+      memberConversions: memberConversions.length,
+      teamConversions: teamConversions.length
+    };
+
+    console.log(responseData);
+
+    return res.status(200).json(responseData);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred" });
   }
 };

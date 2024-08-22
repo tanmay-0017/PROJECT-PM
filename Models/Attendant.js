@@ -102,6 +102,10 @@ const attendantSchema = new mongoose.Schema(
       enum: ["online", "offline"],
       default: "offline",
     },
+    meetingsAttended: { 
+      type: Number, 
+      default: 0 
+    }
   },
   {
     timestamps: true,

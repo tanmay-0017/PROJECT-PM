@@ -8,6 +8,7 @@ import {
   Top_Executive,
   Bar,
   getNotes,
+  clientConversion
 } from "../Controllers/overviewController.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.get("/total-status", onlineEmployStatus);
 router.get("/Top_Executive", Top_Executive);
 router.get("/Bar", Bar);
 router.get("/Note", getNotes);
+router.put("/clientConversion", clientConversion);
 
 export default router;

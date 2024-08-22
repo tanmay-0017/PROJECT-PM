@@ -16,6 +16,7 @@ const teamSchema = new mongoose.Schema({
   managerName: { type: String, required: true },
   managerEmail: { type: String, required: true },
   teamMemberNames: [teamsSchema],
+  clientConversion: { type: Number, default: 0}
 });
 
 const Team = mongoose.model("Team", teamSchema);

@@ -2,6 +2,7 @@ import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
+import Team from "../Models/teamModel.js";
 
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
@@ -203,6 +204,9 @@ export const clientConversion = async (req, res) => {
   const { employeeId } = req.params;
   try {
     const teamMember = await Attendant.findOne({ employeeId: employeeId });
+    // console.log(teamMember);
+    const team = await Team.findOne({teamName: teamMember.team});
+    // console.log(team);
     if (!teamMember) {
       return res.status(404).json({ message: "Team member not found" });
     }
@@ -212,8 +216,14 @@ export const clientConversion = async (req, res) => {
       { $inc: { clientConversion: 1 } },
       { new: true } // Optionally return the updated document
     );
+    const result1 = await Team.findByIdAndUpdate(
+      team._id, // Use the ObjectId directly
+      { $inc: { clientConversion: 1 } },
+      { new: true } // Optionally return the updated document
+    );
 
     console.log(result);
+    console.log(result1);
     return res.status(200).json(result);
   } catch (error) {
     console.error(error);
