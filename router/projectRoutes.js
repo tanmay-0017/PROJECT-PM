@@ -26,7 +26,7 @@ router.post(
 );
 
 router.put("/update/:name", updateProject);
-router.delete("/delete/:name", deleteProject);
+router.delete("/delete/:id", deleteProject);
 router.post("/ProjectFilter", ProjectFilter);
 
 export default router;

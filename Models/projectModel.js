@@ -20,7 +20,6 @@ const projectSchema = new mongoose.Schema({
   },
   projectImage: {
     type: String, // cloudinary url
-    required: true,
   },
   description: {
     type: String,
