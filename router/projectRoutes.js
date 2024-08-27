@@ -25,7 +25,16 @@ router.post(
   createProject
 );
 
-router.put("/update/:name", updateProject);
+router.put(
+  "/update/:id",
+  upload.fields([
+    {
+      name: "projectImage",
+      maxCount: 1,
+    },
+  ]),
+  updateProject
+);
 router.delete("/delete/:id", deleteProject);
 router.post("/ProjectFilter", ProjectFilter);
 
