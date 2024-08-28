@@ -27,6 +27,7 @@ const partnerSchema = new mongoose.Schema(
     attendantName: { type: String, required: true },
     timeDuration: { type: String, default: "00 : 00" },
     notes: { type: String },
+    channelID: { type: String, required: true },
     // log: [logSchema]
     chequeImage: [chequeImages],
   },
