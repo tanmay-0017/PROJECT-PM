@@ -1,6 +1,7 @@
 import Partner from "../Models/ChannelPartner.js";
 import Attendant from "../Models/Attendant.js";
 import Project from "../Models/projectModel.js";
+import { response } from "express";
 
 export const createPartner = async (req, res) => {
   try {
@@ -11,6 +12,7 @@ export const createPartner = async (req, res) => {
       customerMobileLastFour,
       projectName,
       projectLocation,
+      channelID,
       notes,
     } = req.body;
 
@@ -72,6 +74,7 @@ export const createPartner = async (req, res) => {
       partnerId,
       attendant: availableAttendant._id,
       attendantName: availableAttendant.name,
+      channelID,
       notes,
     });
 
@@ -150,5 +153,20 @@ export const getCustomersByPartnerName = async (req, res) => {
     res.status(200).json(customers);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const filterchannel = async (req, res) => {
+  try {
+    const { channelID } = req.params;
+    const channelFilter = await Partner.find({ channelID });
+
+    if (channelFilter.length === 0) {
+      return res.status(404).json({ message: "Channel not found" });
+    }
+
+    res.status(200).json(channelFilter);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
