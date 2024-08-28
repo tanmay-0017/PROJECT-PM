@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Project from "../Models/projectModel.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { response } from "express";
 
 // Get all projects
 export const getProjects = async (req, res) => {
@@ -222,5 +223,19 @@ export const ProjectFilter = async (req, res) => {
     return res.status(200).json(project);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const projectone = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const oneproject = await Project.findById(id);
+
+    if (!oneproject) {
+      res.status(404).json({ message: "Project not found" });
+    }
+    res.status(200).json(oneproject);
+  } catch (error) {
+    res.status(404).json({ message: "Error: " + error.message });
   }
 };
