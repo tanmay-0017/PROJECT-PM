@@ -29,7 +29,7 @@ import settingsManagerRouter from "./router/settingsManager.js";
 import settingsAdminRouter from "./router/settingsAdmin.js";
 import overviewRouter from "./router/overviewRouter.js";
 import managerRouter from "./router/managerRouter.js";
-
+import ViewMembersRouter from "./router/ViewMembers.router.js";
 
 const app = express();
 app.use(
@@ -78,7 +78,7 @@ app.use("/api/settingsExecutive", settingsExecutiveRouter);
 app.use("/api/settingsManager", settingsManagerRouter);
 app.use("/api/settingsAdmin", settingsAdminRouter);
 app.use("/api/overview", overviewRouter);
-app.use('/api/manager', managerRouter);
-
+app.use("/api/manager", managerRouter);
+app.use("/api/ViewMembers", ViewMembersRouter);
 
 export { app };
