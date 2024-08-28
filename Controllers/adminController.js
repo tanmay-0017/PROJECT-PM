@@ -106,6 +106,7 @@ export const loginUser = async (req, res) => {
       token,
       role: user.role,
       employeeId: user.employeeId,
+      email: user.email,
     };
 
     if (role === "sales executive") {
