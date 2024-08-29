@@ -28,6 +28,7 @@ const partnerSchema = new mongoose.Schema(
     timeDuration: { type: String, default: "00 : 00" },
     notes: { type: String },
     channelID: { type: String, required: true },
+    timeResponse: { type: String, default: "00 : 00" },
     // log: [logSchema]
     chequeImage: [chequeImages],
   },
