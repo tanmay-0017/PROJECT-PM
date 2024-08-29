@@ -58,11 +58,10 @@ export const getNumberOfChannelVisitors = asyncHandler(async (req, res) => {
     createdAt: { $gte: startDate },
   });
 
-  const numberOfChannelVisitors = allChannelVisitors.length;
-
-  if (numberOfChannelVisitors === 0) {
+  if (!allChannelVisitors) {
     return res.status(404).json({ message: "Channel Visitors not found!" });
   }
+  const numberOfChannelVisitors = allChannelVisitors.length;
 
   res.status(200).json({ numberOfChannelVisitors });
 });
