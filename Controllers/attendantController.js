@@ -2,7 +2,7 @@ import Attendant from "../Models/Attendant.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
-
+import Team from "../Models/teamModel.js";
 /*
 export const createAttendant = asyncHandler(async (req, res) => {
   const { name, status, team, email, project, phone } = req.body;
@@ -201,22 +201,45 @@ export const addTeamMember = asyncHandler(async (req, res) => {
 
 export const clientConversion = async (req, res) => {
   const { employeeId } = req.params;
+
   try {
-    const teamMember = await Attendant.findOne({ employeeId: employeeId });
+    // Find and update Attendant
+    const teamMember = await Attendant.findOne({ employeeId });
     if (!teamMember) {
       return res.status(404).json({ message: "Team member not found" });
     }
 
     const result = await Attendant.findByIdAndUpdate(
-      teamMember._id, // Use the ObjectId directly
+      teamMember._id,
       { $inc: { clientConversion: 1 } },
-      { new: true } // Optionally return the updated document
+      { new: true }
     );
 
-    console.log(result);
+    // Find and update Team
+    const team = await Team.findOne({
+      "teamMemberNames.employeeId": employeeId,
+    });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    const updatedTeam = await Team.findOneAndUpdate(
+      { "teamMemberNames.employeeId": employeeId },
+      { $inc: { "teamMemberNames.$[elem].clientConversion": 1 } },
+      {
+        arrayFilters: [{ "elem.employeeId": employeeId }],
+        new: true,
+      }
+    );
+
+    if (!updatedTeam) {
+      return res.status(404).json({ message: "Employee not found in team" });
+    }
+    console.log(updatedTeam);
     return res.status(200).json(result);
   } catch (error) {
-    console.error(error);
+    console.error("Error during client conversion update:", error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };

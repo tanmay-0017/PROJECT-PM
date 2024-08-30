@@ -5,6 +5,7 @@ import ChannelPartner from "../Models/ChannelPartner.js";
 import { BarDiagram } from "../Models/BarDiagram.js";
 import SalesNote from "../Models/SalesNote.js";
 import Partner from "../Models/ChannelPartner.js";
+import Team from "../Models/teamModel.js";
 const calculateStartDate = (interval) => {
   const now = new Date();
   let startDate;
@@ -670,3 +671,151 @@ export const getNotes = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// export const TOP3Team = asyncHandler(async (req, res) => {
+//   const { interval } = req.query; // Assuming interval might be used for filtering
+
+//   try {
+//     // Fetch all teams from the database
+//     const teams = await Team.find();
+
+//     // Create an array to store teams with their client count and conversion count
+//     const teamsWithClientStats = teams.map((team) => {
+//       let clientCount = 0;
+//       let conversionCount = 0;
+
+//       // Count clients and conversions for each team member
+//       team.teamMemberNames.forEach((member) => {
+//         // Increment client count by the length of the ClientName array
+//         clientCount += Array.isArray(member.ClientName)
+//           ? member.ClientName.length
+//           : 0;
+
+//         // Increment conversion count by the member's clientConversion value
+//         conversionCount += member.clientConversion || 0;
+//       });
+
+//       return {
+//         teamName: team.teamName,
+//         managerName: team.managerName,
+//         clientCount: clientCount,
+//         conversionCount: conversionCount,
+//       };
+//     });
+
+//     // Sort teams based on conversion count in descending order
+//     teamsWithClientStats.sort((a, b) => b.conversionCount - a.conversionCount);
+
+//     // Get the top 3 teams
+//     const top3Teams = teamsWithClientStats.slice(0, 3);
+
+//     // Send the top 3 teams as a response
+//     res.status(200).json(top3Teams);
+//   } catch (error) {
+//     res.status(500).json({ message: "Server Error", error });
+//   }
+// });
+
+// export const TOP3Team = asyncHandler(async (req, res) => {
+//   const { interval } = req.query; // Assuming interval might be used for filtering
+
+//   try {
+//     // Fetch all teams from the database
+
+//     const teams = await Team.find();
+
+//     // Create an array to store teams with their client count and conversion count
+//     const teamsWithClientStats = teams.map((team) => {
+//       let clientCount = 0;
+//       let conversionCount = 0;
+
+//       // Count clients and conversions for each team member
+//       team.teamMemberNames.forEach((member) => {
+//         // Increment client count by the length of the ClientName array
+//         clientCount += Array.isArray(member.ClientName)
+//           ? member.ClientName.length
+//           : 0;
+
+//         // Increment conversion count by the member's clientConversion value
+//         conversionCount += member.clientConversion || 0;
+//       });
+
+//       return {
+//         teamName: team.teamName,
+//         managerName: team.managerName,
+//         clientCount: clientCount,
+//         conversionCount: conversionCount,
+//       };
+//     });
+
+//     // Sort teams based on conversion count in descending order
+//     teamsWithClientStats.sort((a, b) => b.conversionCount - a.conversionCount);
+
+//     // Get the top 3 teams
+//     const top3Teams = teamsWithClientStats.slice(0, 3);
+
+//     // Send the top 3 teams as a response
+//     res.status(200).json(top3Teams);
+//   } catch (error) {
+//     res.status(500).json({ message: "Server Error", error });
+//   }
+// });
+
+export const TOP3Team = asyncHandler(async (req, res) => {
+  const { interval } = req.query;
+
+  try {
+    // Calculate the start date based on the interval
+    const startDate = calculateStartDate(interval);
+    console.log("Interval:", interval);
+    console.log("Start Date:", startDate);
+
+    // Fetch all teams from the database updated within the specified interval
+    const teams = await Team.find({
+      updatedAt: { $gte: startDate },
+    });
+
+    console.log("Teams Fetched:", teams);
+
+    // Create an array to store teams with their client count and conversion count
+    const teamsWithClientStats = teams.map((team) => {
+      let clientCount = 0;
+      let conversionCount = 0;
+
+      // Count clients and conversions for each team member within the specified interval
+      team.teamMemberNames.forEach((member) => {
+        const filteredClients = Array.isArray(member.ClientName)
+          ? member.ClientName.filter(
+              (client) => new Date(client.updatedAt) >= startDate
+            )
+          : [];
+
+        const filteredConversions = filteredClients.filter(
+          (client) => client.clientConversion
+        );
+        console.log("filteredConversions", filteredConversions);
+        clientCount += filteredClients.length;
+        conversionCount += filteredConversions.length;
+      });
+
+      return {
+        teamName: team.teamName,
+        managerName: team.managerName,
+        clientCount,
+        conversionCount,
+      };
+    });
+
+    console.log("Teams with Client Stats:", teamsWithClientStats);
+
+    // Sort teams based on conversion count in descending order
+    teamsWithClientStats.sort((a, b) => b.conversionCount - a.conversionCount);
+
+    // Get the top 3 teams
+    const top3Teams = teamsWithClientStats.slice(0, 3);
+
+    res.status(200).json(top3Teams);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+});
