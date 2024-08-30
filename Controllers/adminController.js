@@ -156,7 +156,7 @@ const sendOTPEmail = async (email, otp) => {
 };
 
 const findUserByEmail = async (email) => {
-  const emailRegex = new RegExp(`^${email}$`, 'i'); // Case-insensitive regex search
+  const emailRegex = new RegExp(`^${email}$`, "i"); // Case-insensitive regex search
 
   let user = await Admin.findOne({ email: emailRegex });
   if (user) return { user, model: Admin };

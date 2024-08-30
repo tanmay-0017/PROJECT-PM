@@ -406,6 +406,7 @@ export const addonemember = async (req, res) => {
               name: attendant.name,
               employeeId: attendant.employeeId,
               email: attendant.email,
+              clientConversion: attendant.clientConversion,
               teamName: teamData.teamName,
               projectName: teamData.projectName,
               managerName: teamData.managerName,
