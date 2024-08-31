@@ -671,3 +671,138 @@ export const getNotes = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const TOP3Team = asyncHandler(async (req, res) => {
+  const { interval } = req.query; // Assuming interval might be used for filtering
+
+  try {
+    // Fetch all teams from the database
+    const teams = await Team.find();
+
+    // Create an array to store teams with their client count and conversion count
+    const teamsWithClientStats = teams.map((team) => {
+      let clientCount = 0;
+      let conversionCount = 0;
+
+      // Count clients and conversions for each team member
+      team.teamMemberNames.forEach((member) => {
+        // Increment client count by the length of the ClientName array
+        clientCount += Array.isArray(member.ClientName)
+          ? member.ClientName.length
+          : 0;
+
+        // Increment conversion count by the member's clientConversion value
+        conversionCount += member.clientConversion || 0;
+      });
+
+      return {
+        teamName: team.teamName,
+        managerName: team.managerName,
+        clientCount: clientCount,
+        conversionCount: conversionCount,
+      };
+    });
+
+    // Sort teams based on conversion count in descending order
+    teamsWithClientStats.sort((a, b) => b.conversionCount - a.conversionCount);
+
+    // Get the top 3 teams
+    const top3Teams = teamsWithClientStats.slice(0, 3);
+
+    // Send the top 3 teams as a response
+    res.status(200).json(top3Teams);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+// export const TOP3Team = asyncHandler(async (req, res) => {
+//   const { interval } = req.query; // Assuming interval might be used for filtering
+
+//   try {
+//     // Fetch all teams from the database
+
+//     const teams = await Team.find();
+
+//     // Create an array to store teams with their client count and conversion count
+//     const teamsWithClientStats = teams.map((team) => {
+//       let clientCount = 0;
+//       let conversionCount = 0;
+
+//       // Count clients and conversions for each team member
+//       team.teamMemberNames.forEach((member) => {
+//         // Increment client count by the length of the ClientName array
+//         clientCount += Array.isArray(member.ClientName)
+//           ? member.ClientName.length
+//           : 0;
+
+//         // Increment conversion count by the member's clientConversion value
+//         conversionCount += member.clientConversion || 0;
+//       });
+
+//       return {
+//         teamName: team.teamName,
+//         managerName: team.managerName,
+//         clientCount: clientCount,
+//         conversionCount: conversionCount,
+//       };
+//     });
+
+//     // Sort teams based on conversion count in descending order
+//     teamsWithClientStats.sort((a, b) => b.conversionCount - a.conversionCount);
+
+//     // Get the top 3 teams
+//     const top3Teams = teamsWithClientStats.slice(0, 3);
+
+//     // Send the top 3 teams as a response
+//     res.status(200).json(top3Teams);
+//   } catch (error) {
+//     res.status(500).json({ message: "Server Error", error });
+//   }
+// });
+
+// export const TOP3Team = asyncHandler(async (req, res) => {
+//   const { interval } = req.query;
+
+//   try {
+//     // Calculate the start date based on the interval
+//     const startDate = calculateStartDate(interval);
+
+//     // Fetch all teams updated within the specified interval
+//     const allTeams = await Team.find({
+//       updatedAt: { $gte: startDate },
+//     });
+
+//     // Sort teams by client conversion count in descending order
+//     const sortedTeams = allTeams.sort(
+//       (a, b) => b.clientConversion - a.clientConversion
+//     );
+
+//     // Take the top 3 teams
+//     const top3Teams = sortedTeams.slice(0, 3);
+
+//     // Add filtered meetings count to each team
+//     const teamsWithFilteredMeetings = top3Teams.map((team) => {
+//       const filteredMeetings = team.teamMemberNames.flatMap((member) => {
+//         return Array.isArray(member.ClientName)
+//           ? member.ClientName.filter((client) => {
+//               const meetingDate = new Date(client.updatedAt);
+//               return meetingDate >= startDate;
+//             })
+//           : [];
+//       });
+
+//       const totalMeetings = filteredMeetings.length;
+
+//       return {
+//         ...team.toObject(), // Convert Mongoose document to plain object
+//         totalMeetings, // Add total filtered meetings count to each team
+//       };
+//     });
+
+//     console.log(teamsWithFilteredMeetings);
+//     return res.status(200).json(teamsWithFilteredMeetings);
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
+// });
