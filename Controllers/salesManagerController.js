@@ -1,7 +1,7 @@
 import SalesManager from "../Models/salesManager.js";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
-
+import Team from "../Models/teamModel.js";
 
 const generateRandomPassword = () => {
   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
@@ -25,7 +25,7 @@ const sendEmail = async (email, password) => {
     from: "process.env.EMAIL_USER",
     to: email,
     subject: "Your Account Details",
-    text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+    text: `Your account of sales manager has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
   };
 
   await transporter.sendMail(mailOptions);
@@ -54,7 +54,6 @@ export const createSalesManager = async (req, res) => {
     const defaultPassword = generateRandomPassword();
 
     const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
-
 
     const salesManager = new SalesManager({
       name,
@@ -120,5 +119,23 @@ export const deleteSalesManager = async (req, res) => {
     res.status(200).json({ message: "Sales Manager deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const findSalesManagerTeamData = async (req, res) => {
+  try {
+    const { managerEmail } = req.params;
+
+    // Find all teams with the given managerEmail and select only teamMemberNames
+    const teams = await Team.find({ managerEmail }, "teamMemberNames");
+
+    // Extract and spread the teamMemberNames from each team
+    const teamMemberNames = teams.flatMap((team) => team.teamMemberNames);
+
+    // Send the response with the list of all teamMemberNames
+    res.status(200).json(teamMemberNames);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ message: "Server Error", error });
   }
 };

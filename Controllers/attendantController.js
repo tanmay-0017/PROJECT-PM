@@ -63,7 +63,7 @@ const sendEmail = async (email, password) => {
     from: "process.env.EMAIL_USER",
     to: email,
     subject: "Your Account Details",
-    text: `Your account has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+    text: `Your account of sales executive has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
   };
 
   await transporter.sendMail(mailOptions);
