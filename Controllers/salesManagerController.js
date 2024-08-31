@@ -2,7 +2,7 @@ import SalesManager from "../Models/salesManager.js";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import Team from "../Models/teamModel.js";
-
+import Attendant from "../Models/Attendant.js";
 const generateRandomPassword = () => {
   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
   return `Rof@${randomNumbers}`;
@@ -129,11 +129,25 @@ export const findSalesManagerTeamData = async (req, res) => {
     // Find all teams with the given managerEmail and select only teamMemberNames
     const teams = await Team.find({ managerEmail }, "teamMemberNames");
 
-    // Extract and spread the teamMemberNames from each team
+    // Extract and flatten the teamMemberNames from each team
     const teamMemberNames = teams.flatMap((team) => team.teamMemberNames);
 
-    // Send the response with the list of all teamMemberNames
-    res.status(200).json(teamMemberNames);
+    // Create a Set of employeeIds for quick lookup
+    const teamMemberEmployeeIds = new Set(
+      teamMemberNames.map((member) => member.employeeId)
+    );
+
+    // Find all attendants whose employeeId is in the list of teamMemberEmployeeIds
+    const attendants = await Attendant.find({});
+
+    const teamMemberData = attendants.filter((attendant) =>
+      teamMemberEmployeeIds.has(attendant.employeeId)
+    );
+
+    console.log("Matched Attendants:", teamMemberData);
+
+    // Send the response with the list of matched team members
+    res.status(200).json(teamMemberData);
   } catch (error) {
     // Handle errors
     res.status(500).json({ message: "Server Error", error });
