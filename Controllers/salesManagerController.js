@@ -224,23 +224,23 @@ export const findSalesManagerlastTeamData = async (req, res) => {
       employeeId: { $in: Array.from(teamMemberEmployeeIds) },
     });
 
-    // Extract the last client name for each team member and spread the attendant data
+    // Extract the last client info for each team member and spread the attendant data
     const teamMemberData = attendants.map((attendant) => {
-      // Get the last client name from the ClientName array
-      const lastClientName = attendant.ClientName?.length
-        ? attendant.ClientName[attendant.ClientName?.length - 1]
+      // Get the last client info from the ClientName array
+      const lastClientInfo = attendant.ClientName?.length
+        ? attendant.ClientName[attendant.ClientName.length - 1]
         : null;
 
-      // Return the spread attendant data along with the last client name
+      // Return the spread attendant data along with the last client info
       return {
         ...attendant.toObject(), // Spread the attendant data
-        lastClientName: { ...lastClientName }, // Add the last client name
+        lastClientName: lastClientInfo, // Add the last client info
       };
     });
 
-    console.log("Matched Attendants with Last Client Name:", teamMemberData);
+    console.log("Matched Attendants with Last Client Info:", teamMemberData);
 
-    // Send the response with the list of matched team members and their last client name
+    // Send the response with the list of matched team members and their last client info
     res.status(200).json(teamMemberData);
   } catch (error) {
     // Handle errors
