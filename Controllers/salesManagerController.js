@@ -203,3 +203,47 @@ export const getSalesManagerByEmployId = async (req, res) => {
     res.status(404).json(error.massage);
   }
 };
+
+export const findSalesManagerlastTeamData = async (req, res) => {
+  try {
+    const { managerEmail } = req.params;
+
+    // Find all teams with the given managerEmail and select only teamMemberNames
+    const teams = await Team.find({ managerEmail }, "teamMemberNames");
+
+    // Extract and flatten the teamMemberNames from each team
+    const teamMemberNames = teams.flatMap((team) => team.teamMemberNames);
+
+    // Create a Set of employeeIds for quick lookup
+    const teamMemberEmployeeIds = new Set(
+      teamMemberNames.map((member) => member.employeeId)
+    );
+
+    // Find all attendants whose employeeId is in the list of teamMemberEmployeeIds
+    const attendants = await Attendant.find({
+      employeeId: { $in: Array.from(teamMemberEmployeeIds) },
+    });
+
+    // Extract the last client name for each team member and spread the attendant data
+    const teamMemberData = attendants.map((attendant) => {
+      // Get the last client name from the ClientName array
+      const lastClientName = attendant.ClientName?.length
+        ? attendant.ClientName[attendant.ClientName?.length - 1]
+        : null;
+
+      // Return the spread attendant data along with the last client name
+      return {
+        ...attendant.toObject(), // Spread the attendant data
+        lastClientName: { ...lastClientName }, // Add the last client name
+      };
+    });
+
+    console.log("Matched Attendants with Last Client Name:", teamMemberData);
+
+    // Send the response with the list of matched team members and their last client name
+    res.status(200).json(teamMemberData);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ message: "Server Error", error });
+  }
+};
