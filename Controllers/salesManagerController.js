@@ -192,3 +192,14 @@ export const findSalesManagerTeamData = async (req, res) => {
     res.status(500).json({ message: "Server Error", error });
   }
 };
+
+export const getSalesManagerByEmployId = async (req, res) => {
+  const { employeeId } = req.params;
+  console.log(employeeId);
+  try {
+    const employee = await SalesManager.findOne({ employeeId });
+    return res.status(200).json(employee);
+  } catch (error) {
+    res.status(404).json(error.massage);
+  }
+};
