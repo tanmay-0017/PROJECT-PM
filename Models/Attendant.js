@@ -70,6 +70,8 @@ const attendantSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      required: true,
+      unique: true,
     },
     managerName: {
       type: String,
