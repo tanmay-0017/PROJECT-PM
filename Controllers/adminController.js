@@ -21,7 +21,7 @@ const getModelByRole = (role) => {
 
 export const createAdmin = async (req, res) => {
   try {
-    const { email, password, role, ...otherData } = req.body;
+    const { email, password, role, phone, ...otherData } = req.body;
 
     if (!password || password.trim().length === 0) {
       return res
@@ -29,11 +29,11 @@ export const createAdmin = async (req, res) => {
         .json({ message: "Password is required" });
     }
 
-    const existingAdmin = await Admin.findOne({ email });
+    const existingAdmin = await Admin.findOne({ phone });
     if (existingAdmin) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Admin with this email already exists" });
+        .json({ message: "Admin with this phone already exists" });
     }
     const lastemployee = await Admin.findOne().sort({ $natural: -1 });
     console.log(lastemployee, "Last employee");
@@ -49,6 +49,7 @@ export const createAdmin = async (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, 10);
     const newAdmin = new Admin({
       email,
+      phone,
       password: hashedPassword,
       role,
       ...otherData,
@@ -67,8 +68,8 @@ export const createAdmin = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-    if (!email || !password || !role) {
+    const { phone, password, role } = req.body;
+    if (!phone || !password || !role) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "Email, password, and role are required" });
@@ -81,11 +82,11 @@ export const loginUser = async (req, res) => {
         .json({ message: "Invalid role" });
     }
 
-    const user = await Model.findOne({ email });
+    const user = await Model.findOne({ phone });
     if (!user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Invalid email" });
+        .json({ message: "Invalid phone" });
     }
 
     const isPasswordValid = bcrypt.compareSync(password, user.password);
@@ -97,7 +98,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userEmail: user.email, role: user.role },
+      { userEmail: user.email, role: user.role, phone: user.phone },
       "secret1234"
     );
 
@@ -107,6 +108,7 @@ export const loginUser = async (req, res) => {
       role: user.role,
       employeeId: user.employeeId,
       email: user.email,
+      phone: user.phone,
     };
 
     if (role === "sales executive") {
@@ -155,21 +157,38 @@ const sendOTPEmail = async (email, otp) => {
   }
 };
 
-const findUserByEmail = async (email) => {
-  const emailRegex = new RegExp(`^${email}$`, "i"); // Case-insensitive regex search
+// const findUserByEmail = async (email) => {
+//   const emailRegex = new RegExp(`^${email}$`, "i"); // Case-insensitive regex search
 
-  let user = await Admin.findOne({ email: emailRegex });
+//   let user = await Admin.findOne({ email: emailRegex });
+//   if (user) return { user, model: Admin };
+
+//   user = await SalesManager.findOne({ email: emailRegex });
+//   if (user) return { user, model: SalesManager };
+
+//   user = await Attendant.findOne({ email: emailRegex });
+//   if (user) return { user, model: Attendant };
+
+//   return null;
+// };
+
+const findUserByPhone = async (phone) => {
+  const phoneRegex = new RegExp(`^${phone}$`, "i"); // Case-insensitive regex search
+
+  let user = await Admin.findOne({ phone: phoneRegex });
   if (user) return { user, model: Admin };
 
-  user = await SalesManager.findOne({ email: emailRegex });
+  user = await SalesManager.findOne({ phone: phoneRegex });
   if (user) return { user, model: SalesManager };
 
-  user = await Attendant.findOne({ email: emailRegex });
+  user = await Attendant.findOne({ phone: phoneRegex });
   if (user) return { user, model: Attendant };
 
   return null;
 };
 
+{
+  /*
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -330,11 +349,175 @@ export const changePassword = async (req, res) => {
       .json({ message: "Server error" });
   }
 };
+*/
+}
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Phone number is required" });
+    }
+
+    const userResult = await findUserByPhone(phone);
+    if (!userResult) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "User with this phone number does not exist" });
+    }
+
+    const { user } = userResult;
+    const otp = generateOTP();
+    user.resetOTP = otp;
+    user.resetOTPExpiry = Date.now() + 3600000; // 1 hour expiry
+    await user.save();
+
+    await sendOTPText(phone, otp); // Modify this function to send OTP via SMS
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "OTP sent to phone number successfully" });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "An error occurred, please try again later." });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+    if (!phone || !otp) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Phone number and OTP are required" });
+    }
+
+    const userResult = await findUserByPhone(phone);
+    if (!userResult) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "User not found" });
+    }
+
+    const { user } = userResult;
+
+    if (user.resetOTP !== otp || user.resetOTPExpiry < Date.now()) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Invalid or expired OTP" });
+    }
+
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, message: "OTP verified successfully" });
+  } catch (error) {
+    console.error("Error in verifyOtp:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "An error occurred, please try again later." });
+  }
+};
+
+export const setNewPassword = async (req, res) => {
+  try {
+    const { phone, newPassword, confirmPassword } = req.body;
+
+    if (!phone || !newPassword || !confirmPassword) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message:
+          "Phone number, new password, and confirm password are required",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Passwords do not match" });
+    }
+
+    const userResult = await findUserByPhone(phone);
+    if (!userResult) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "User not found" });
+    }
+
+    const { user } = userResult;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetOTP = null;
+    user.resetOTPExpiry = null;
+
+    await user.save();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error in setNewPassword:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "An error occurred, please try again later." });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { phone, oldPassword, newPassword, confirmPassword } = req.body;
+
+    if (!phone || !oldPassword || !newPassword || !confirmPassword) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "All fields are required" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "New passwords do not match" });
+    }
+
+    const userResult = await findUserByPhone(phone);
+
+    if (!userResult) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "User not found" });
+    }
+
+    const { user } = userResult;
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Old password is incorrect" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error in changePassword:", error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
+  }
+};
 
 export const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, password, role, ...otherData } = req.body;
+    const { email, password, role, phone, ...otherData } = req.body;
 
     const admin = await Admin.findById(id);
     if (!admin) {

@@ -32,15 +32,54 @@ const sendEmail = async (email, password) => {
 };
 
 // Create a new Sales Manager
+// export const createSalesManager = async (req, res) => {
+//   try {
+//     const { name, email, phone } = req.body;
+
+//     const existingManager = await SalesManager.findOne({ email });
+//     if (existingManager) {
+//       return res
+//         .status(400)
+//         .json({ message: "An account with this email already exists." });
+//     }
+//     const lastemployee = await SalesManager.findOne().sort({ $natural: -1 });
+//     let employeeId;
+
+//     if (lastemployee && lastemployee.employeeId) {
+//       const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(6));
+//       employeeId = `ROFEMO${(lastemployeeIdNum + 1).toString()}`;
+//     } else {
+//       employeeId = "ROFEMO1";
+//     }
+//     const defaultPassword = generateRandomPassword();
+
+//     const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
+//     const salesManager = new SalesManager({
+//       name,
+//       email,
+//       phone,
+//       employeeId,
+//       password: hashedPassword,
+//     });
+//     // console.log("default Password", defaultPassword);
+//     await sendEmail(email, defaultPassword);
+//     await salesManager.save();
+//     res.status(201).json(salesManager);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 export const createSalesManager = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
 
-    const existingManager = await SalesManager.findOne({ email });
+    const existingManager = await SalesManager.findOne({ phone });
     if (existingManager) {
       return res
         .status(400)
-        .json({ message: "An account with this email already exists." });
+        .json({ message: "An account with this phone already exists." });
     }
     const lastemployee = await SalesManager.findOne().sort({ $natural: -1 });
     let employeeId;
@@ -62,7 +101,7 @@ export const createSalesManager = async (req, res) => {
       employeeId,
       password: hashedPassword,
     });
-    // console.log("default Password", defaultPassword);
+    console.log("default Password", defaultPassword);
     await sendEmail(email, defaultPassword);
     await salesManager.save();
     res.status(201).json(salesManager);

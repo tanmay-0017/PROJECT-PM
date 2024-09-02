@@ -69,20 +69,70 @@ const sendEmail = async (email, password) => {
   await transporter.sendMail(mailOptions);
 };
 
+// export const createAttendant = asyncHandler(async (req, res) => {
+//   const { name, status, team, email, project, phone } = req.body;
+
+//   if (!name || !email) {
+//     return res
+//       .status(400)
+//       .json({ message: "Name and email are required fields." });
+//   }
+
+//   const existingAttendant = await Attendant.findOne({ phone });
+//   if (existingAttendant) {
+//     return res
+//       .status(400)
+//       .json({ message: "An account with this email already exists." });
+//   }
+
+//   const defaultPassword = generateRandomPassword();
+
+//   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
+//   let employeeId;
+
+//   if (lastemployee && lastemployee.employeeId) {
+//     const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(5));
+//     employeeId = `ROFEX${(lastemployeeIdNum + 1).toString()}`;
+//   } else {
+//     employeeId = "ROFEX1";
+//   }
+
+//   const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
+//   const newAttendant = new Attendant({
+//     name,
+//     status,
+//     team,
+//     employeeId,
+//     email,
+//     project,
+//     phone,
+//     password: hashedPassword,
+//   });
+
+//   try {
+//     // console.log("default Password",defaultPassword);
+//     await sendEmail(email, defaultPassword);
+//     const savedAttendant = await newAttendant.save();
+//     res.status(201).json(savedAttendant);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// });
 export const createAttendant = asyncHandler(async (req, res) => {
   const { name, status, team, email, project, phone } = req.body;
 
-  if (!name || !email) {
+  if (!name || !phone) {
     return res
       .status(400)
-      .json({ message: "Name and email are required fields." });
+      .json({ message: "Name and phone are required fields." });
   }
 
-  const existingAttendant = await Attendant.findOne({ email });
+  const existingAttendant = await Attendant.findOne({ phone });
   if (existingAttendant) {
     return res
       .status(400)
-      .json({ message: "An account with this email already exists." });
+      .json({ message: "An account with this phone already exists." });
   }
 
   const defaultPassword = generateRandomPassword();

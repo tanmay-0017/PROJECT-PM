@@ -5,7 +5,6 @@ const adminSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
     },
     password: {
       type: String,
@@ -44,6 +43,8 @@ const adminSchema = new Schema(
     },
     phone: {
       type: String,
+      required: true,
+      unique: true,
     },
     CoverImage: {
       type: String,
