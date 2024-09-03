@@ -6,6 +6,7 @@ import {
   createCustomer,
   deleteCustomer,
   getCustomerById,
+  getCustomerV2,
   getCustomers,
   updateCustomer,
   updateCustomerV2,
@@ -20,5 +21,6 @@ router.put("/update/:id", updateCustomer);
 router.delete("/delete/:id", deleteCustomer);
 router.put("/NoteUpdate/:id", ClientNotes);
 router.put("/DataUpdate/:customerId", updateCustomerV2);
+router.get("/getCustomerV2/:customerId", getCustomerV2);
 
 export default router;

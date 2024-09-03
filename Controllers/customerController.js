@@ -388,3 +388,26 @@ export const updateCustomerV2 = asyncHandler(async (req, res) => {
     res.status(404).json({ error: error });
   }
 });
+export const getCustomerV2 = asyncHandler(async (req, res) => {
+  const { customerId } = req.params; // Get customerId from request parameters
+  const { name, email, notes } = req.body;
+  try {
+    // First, try to find the customer in the Customer collection using customerId
+    let customer = await Customer.findOne({ customerId });
+
+    // If not found, try to find the customer in the Partner collection using partnerId
+    if (!customer) {
+      customer = await Partner.findOne({ partnerId: customerId });
+    }
+
+    // If still not found, return an error
+    if (!customer) {
+      return res.status(404).json({ message: "Customer or Partner not found" });
+    }
+
+    // Return the updated document
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(404).json({ error: error });
+  }
+});
