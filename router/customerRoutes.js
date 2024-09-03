@@ -8,6 +8,7 @@ import {
   getCustomerById,
   getCustomers,
   updateCustomer,
+  updateCustomerV2,
 } from "../Controllers/customerController.js";
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get("/fetch/:id", getCustomerById);
 router.put("/update/:id", updateCustomer);
 router.delete("/delete/:id", deleteCustomer);
 router.put("/NoteUpdate/:id", ClientNotes);
+router.put("/DataUpdate/:customerId", updateCustomerV2);
 
 export default router;

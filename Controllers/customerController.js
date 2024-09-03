@@ -4,6 +4,7 @@ import Attendant from "../Models/Attendant.js";
 import Project from "../Models/projectModel.js";
 import { v4 as uuidv4 } from "uuid";
 import Team from "../Models/teamModel.js";
+import Partner from "../Models/ChannelPartner.js";
 
 export const createCustomer = asyncHandler(async (req, res) => {
   const { name, email, mobile, projectName, projectLocation, notes } = req.body;
@@ -331,3 +332,59 @@ export const ClientNotes = async (req, res) => {
     res.status(400).json({ massage: error.message });
   }
 };
+
+export const updateCustomerV2 = asyncHandler(async (req, res) => {
+  const { customerId } = req.params; // Get customerId from request parameters
+  const { name, email, notes } = req.body;
+  try {
+    // First, try to find the customer in the Customer collection using customerId
+    let customer = await Customer.findOne({ customerId });
+
+    // If not found, try to find the customer in the Partner collection using partnerId
+    if (!customer) {
+      customer = await Partner.findOne({ partnerId: customerId });
+    }
+
+    // If still not found, return an error
+    if (!customer) {
+      return res.status(404).json({ message: "Customer or Partner not found" });
+    }
+
+    console.log(
+      "customer.collection.collectionName",
+      customer.collection.collectionName
+    );
+
+    // If the customer was found in the Customer collection
+    if (customer.collection.collectionName === "customers") {
+      // Update the Customer document
+      customer = await Customer.findByIdAndUpdate(
+        customer._id,
+        {
+          name,
+          email,
+          notes,
+        },
+        { new: true } // Return the updated document
+      );
+    }
+    // If the customer was found in the Partner collection
+    else if (customer.collection.collectionName === "partners") {
+      // Update the Partner document
+      customer = await Partner.findByIdAndUpdate(
+        customer._id,
+        {
+          customerName: name,
+          notes,
+          email, // Assuming Partner also has an email field; otherwise, remove it
+        },
+        { new: true } // Return the updated document
+      );
+    }
+
+    // Return the updated document
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(404).json({ error: error });
+  }
+});
