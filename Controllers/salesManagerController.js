@@ -3,77 +3,46 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import Team from "../Models/teamModel.js";
 import Attendant from "../Models/Attendant.js";
-const generateRandomPassword = () => {
-  const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
-  return `Rof@${randomNumbers}`;
-};
 
-const sendEmail = async (email, password) => {
-  let config = {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false, // Use `true` for port 465, `false` for all other ports
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  };
-
-  const transporter = nodemailer.createTransport(config);
-
-  const mailOptions = {
-    from: "process.env.EMAIL_USER",
-    to: email,
-    subject: "Your Account Details",
-    text: `Your account of sales manager has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
-  };
-
-  await transporter.sendMail(mailOptions);
-};
-
-// Create a new Sales Manager
-// export const createSalesManager = async (req, res) => {
-//   try {
-//     const { name, email, phone } = req.body;
-
-//     const existingManager = await SalesManager.findOne({ email });
-//     if (existingManager) {
-//       return res
-//         .status(400)
-//         .json({ message: "An account with this email already exists." });
-//     }
-//     const lastemployee = await SalesManager.findOne().sort({ $natural: -1 });
-//     let employeeId;
-
-//     if (lastemployee && lastemployee.employeeId) {
-//       const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(6));
-//       employeeId = `ROFEMO${(lastemployeeIdNum + 1).toString()}`;
-//     } else {
-//       employeeId = "ROFEMO1";
-//     }
-//     const defaultPassword = generateRandomPassword();
-
-//     const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
-
-//     const salesManager = new SalesManager({
-//       name,
-//       email,
-//       phone,
-//       employeeId,
-//       password: hashedPassword,
-//     });
-//     // console.log("default Password", defaultPassword);
-//     await sendEmail(email, defaultPassword);
-//     await salesManager.save();
-//     res.status(201).json(salesManager);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
+// const generateRandomPassword = () => {
+//   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
+//   return `Rof@${randomNumbers}`;
 // };
 
+// const sendEmail = async (email, password) => {
+//   let config = {
+//     host: process.env.SMTP_HOST,
+//     port: process.env.SMTP_PORT,
+//     secure: false, // Use `true` for port 465, `false` for all other ports
+//     auth: {
+//       user: process.env.EMAIL_USER,
+//       pass: process.env.EMAIL_PASS,
+//     },
+//   };
+
+//   const transporter = nodemailer.createTransport(config);
+
+//   const mailOptions = {
+//     from: "process.env.EMAIL_USER",
+//     to: email,
+//     subject: "Your Account Details",
+//     text: `Your account of sales manager has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+//   };
+
+//   await transporter.sendMail(mailOptions);
+// };
+
+
+// Create a new Sales Manager
 export const createSalesManager = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, password } = req.body;
+
+    if (!name || !phone || !password) {
+      return res
+        .status(400)
+        .json({ message: "Name, phone, and password are required fields." });
+    }
 
     const existingManager = await SalesManager.findOne({ phone });
     if (existingManager) {
@@ -81,6 +50,7 @@ export const createSalesManager = async (req, res) => {
         .status(400)
         .json({ message: "An account with this phone already exists." });
     }
+
     const lastemployee = await SalesManager.findOne().sort({ $natural: -1 });
     let employeeId;
 
@@ -90,9 +60,8 @@ export const createSalesManager = async (req, res) => {
     } else {
       employeeId = "ROFEMO1";
     }
-    const defaultPassword = generateRandomPassword();
 
-    const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
     const salesManager = new SalesManager({
       name,
@@ -101,14 +70,15 @@ export const createSalesManager = async (req, res) => {
       employeeId,
       password: hashedPassword,
     });
-    console.log("default Password", defaultPassword);
-    await sendEmail(email, defaultPassword);
+
+    // await sendEmail(email, password);
     await salesManager.save();
     res.status(201).json(salesManager);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get all Sales Managers
 export const getSalesManagers = async (req, res) => {
