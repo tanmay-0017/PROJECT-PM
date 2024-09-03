@@ -41,91 +41,41 @@ export const createAttendant = asyncHandler(async (req, res) => {
 });
 */
 
-const generateRandomPassword = () => {
-  const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
-  return `Rof@${randomNumbers}`;
-};
+// const generateRandomPassword = () => {
+//   const randomNumbers = Math.floor(1000 + Math.random() * 9000).toString();
+//   return `Rof@${randomNumbers}`;
+// };
 
-const sendEmail = async (email, password) => {
-  let config = {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false, // Use `true` for port 465, `false` for all other ports
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  };
+// const sendEmail = async (email, password) => {
+//   let config = {
+//     host: process.env.SMTP_HOST,
+//     port: process.env.SMTP_PORT,
+//     secure: false, // Use `true` for port 465, `false` for all other ports
+//     auth: {
+//       user: process.env.EMAIL_USER,
+//       pass: process.env.EMAIL_PASS,
+//     },
+//   };
 
-  const transporter = nodemailer.createTransport(config);
+//   const transporter = nodemailer.createTransport(config);
 
-  const mailOptions = {
-    from: "process.env.EMAIL_USER",
-    to: email,
-    subject: "Your Account Details",
-    text: `Your account of sales executive has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
-  };
+//   const mailOptions = {
+//     from: "process.env.EMAIL_USER",
+//     to: email,
+//     subject: "Your Account Details",
+//     text: `Your account of sales executive has been created. Your credentials are:\n\nLogin ID: ${email}\nPassword: ${password}`,
+//   };
 
-  await transporter.sendMail(mailOptions);
-};
+//   await transporter.sendMail(mailOptions);
+// };
 
-// export const createAttendant = asyncHandler(async (req, res) => {
-//   const { name, status, team, email, project, phone } = req.body;
-
-//   if (!name || !email) {
-//     return res
-//       .status(400)
-//       .json({ message: "Name and email are required fields." });
-//   }
-
-//   const existingAttendant = await Attendant.findOne({ phone });
-//   if (existingAttendant) {
-//     return res
-//       .status(400)
-//       .json({ message: "An account with this email already exists." });
-//   }
-
-//   const defaultPassword = generateRandomPassword();
-
-//   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
-//   let employeeId;
-
-//   if (lastemployee && lastemployee.employeeId) {
-//     const lastemployeeIdNum = parseInt(lastemployee.employeeId.substring(5));
-//     employeeId = `ROFEX${(lastemployeeIdNum + 1).toString()}`;
-//   } else {
-//     employeeId = "ROFEX1";
-//   }
-
-//   const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
-
-//   const newAttendant = new Attendant({
-//     name,
-//     status,
-//     team,
-//     employeeId,
-//     email,
-//     project,
-//     phone,
-//     password: hashedPassword,
-//   });
-
-//   try {
-//     // console.log("default Password",defaultPassword);
-//     await sendEmail(email, defaultPassword);
-//     const savedAttendant = await newAttendant.save();
-//     res.status(201).json(savedAttendant);
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// });
 export const createAttendant = asyncHandler(async (req, res) => {
-  const { name, status, team, email, project, phone } = req.body;
+  const { name, status, team, email, project, phone, password } = req.body;
 
-  if (!name || !phone) {
+  if (!name || !phone || !password) {
     return res
       .status(400)
-      .json({ message: "Name and phone are required fields." });
+      .json({ message: "Name, phone, and password are required fields." });
   }
 
   const existingAttendant = await Attendant.findOne({ phone });
@@ -134,8 +84,6 @@ export const createAttendant = asyncHandler(async (req, res) => {
       .status(400)
       .json({ message: "An account with this phone already exists." });
   }
-
-  const defaultPassword = generateRandomPassword();
 
   const lastemployee = await Attendant.findOne().sort({ $natural: -1 });
   let employeeId;
@@ -147,7 +95,7 @@ export const createAttendant = asyncHandler(async (req, res) => {
     employeeId = "ROFEX1";
   }
 
-  const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   const newAttendant = new Attendant({
     name,
@@ -161,14 +109,14 @@ export const createAttendant = asyncHandler(async (req, res) => {
   });
 
   try {
-    // console.log("default Password",defaultPassword);
-    await sendEmail(email, defaultPassword);
+    // await sendEmail(email, password);
     const savedAttendant = await newAttendant.save();
     res.status(201).json(savedAttendant);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
+
 
 export const getAttendants = asyncHandler(async (req, res) => {
   const attendants = await Attendant.find();
